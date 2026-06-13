@@ -141,7 +141,8 @@ const vFamilyMembers = document.getElementById('v-family-members');
 
 // Search and filter
 const searchInput = document.querySelector('.search-wrapper input');
-const categoryFilter = document.querySelector('.filter-wrapper select');
+const categoryFilter = document.getElementById('categoryFilter');
+const residentTypeFilter = document.getElementById('residentTypeFilter');
 
 // ============ STATE ============
 let editingDocId = null; // If set, we're in edit mode
@@ -154,40 +155,88 @@ const residentsPaginator = createPaginator({
     itemLabel: 'residents'
 });
 
-// ============ RENDER TABLE ============
+// ============ FLATTEN HOUSEHOLDS INTO INDIVIDUALS ============
 
-function renderTable(residents) {
-    tbody.innerHTML = '';
-
-    if (residents.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 2rem;">No residents found.</td></tr>`;
-        return;
-    }
+/** Expand each household into one row per person (head + family members) */
+function flattenResidents(residents) {
+    const flat = [];
 
     residents.forEach(r => {
         const householdIncome = getHouseholdIncome(r);
-        const cat = classifyIncome(householdIncome);
-        const eligibility = evaluateEligibility(r);
+
+        flat.push({
+            name: r.name,
+            ic: r.ic,
+            age: r.age,
+            gender: r.gender,
+            oku: r.oku,
+            okuType: r.okuType,
+            relationship: 'Ketua Isi Rumah',
+            isHead: true,
+            householdIncome,
+            dependents: r.dependents || 0,
+            household: r
+        });
+
+        (r.familyMembers || []).forEach(m => {
+            flat.push({
+                name: m.name,
+                ic: m.ic,
+                age: m.age,
+                gender: m.gender,
+                oku: m.oku,
+                okuType: m.okuType,
+                relationship: m.relationship || 'Tanggungan',
+                isHead: false,
+                householdIncome,
+                dependents: r.dependents || 0,
+                household: r
+            });
+        });
+    });
+
+    return flat;
+}
+
+// ============ RENDER TABLE ============
+
+function renderTable(persons) {
+    tbody.innerHTML = '';
+
+    if (persons.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 2rem;">No residents found.</td></tr>`;
+        return;
+    }
+
+    persons.forEach(p => {
+        const cat = classifyIncome(p.householdIncome);
+        const eligibility = evaluateEligibility(p.household);
 
         const priorityBadge = eligibility.priority !== 'None'
             ? `<span style="background-color: ${eligibility.bg}; color: ${eligibility.color}; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">${eligibility.priority}</span>`
             : `<span style="color: #94a3b8; font-size: 0.85rem;">-</span>`;
 
+        const nameCell = p.isHead
+            ? p.name
+            : `${p.name} <span style="display:inline-block; margin-left:0.4rem; padding:0.1rem 0.45rem; border-radius:9999px; font-size:0.7rem; font-weight:600; background:#f1f5f9; color:#64748b;">${p.relationship}</span>`;
+
+        const actionsCell = p.isHead
+            ? `<button class="icon-btn view-resident-btn" data-id="${p.household.id}"><i data-lucide="eye"></i></button>
+               <button class="icon-btn edit-resident-btn" data-id="${p.household.id}"><i data-lucide="edit"></i></button>
+               <button class="icon-btn text-red delete-resident-btn" data-id="${p.household.id}"><i data-lucide="trash-2"></i></button>`
+            : `<button class="icon-btn view-resident-btn" data-id="${p.household.id}"><i data-lucide="eye"></i></button>`;
+
         const tr = document.createElement('tr');
-        tr.setAttribute('data-id', r.id);
+        tr.setAttribute('data-id', p.household.id);
         tr.innerHTML = `
-            <td class="font-medium">${r.name}</td>
-            <td>${r.ic}</td>
-            <td>${r.age}</td>
-            <td>${formatNumber(householdIncome)}</td>
-            <td>${r.dependents}</td>
+            <td class="font-medium">${nameCell}</td>
+            <td>${p.ic || '-'}</td>
+            <td>${p.age || '-'}</td>
+            <td>${formatNumber(p.householdIncome)}</td>
+            <td>${p.dependents}</td>
             <td><span class="badge ${badgeClass(cat)}">${cat}</span></td>
             <td>${priorityBadge}</td>
-            <td class="table-actions-cell">
-                <button class="icon-btn view-resident-btn" data-id="${r.id}"><i data-lucide="eye"></i></button>
-                <button class="icon-btn edit-resident-btn" data-id="${r.id}"><i data-lucide="edit"></i></button>
-                <button class="icon-btn text-red delete-resident-btn" data-id="${r.id}"><i data-lucide="trash-2"></i></button>
-            </td>
+            <td class="table-actions-cell">${actionsCell}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -236,21 +285,31 @@ export function listenToResidents() {
 // ============ SEARCH & FILTER ============
 
 function applyFilters(resetPagination = false) {
-    let filtered = [...allResidents];
+    let filtered = flattenResidents(allResidents);
+
+    // Resident type
+    const typeVal = residentTypeFilter.value;
+    if (typeVal === 'head') {
+        filtered = filtered.filter(p => p.isHead);
+    } else if (typeVal === 'elderly') {
+        filtered = filtered.filter(p => (p.age || 0) >= 60);
+    } else if (typeVal === 'underage') {
+        filtered = filtered.filter(p => (p.age || 0) < 18);
+    }
 
     // Search
     const term = searchInput.value.toLowerCase().trim();
     if (term) {
-        filtered = filtered.filter(r =>
-            r.name.toLowerCase().includes(term) ||
-            r.ic.toLowerCase().includes(term)
+        filtered = filtered.filter(p =>
+            (p.name || '').toLowerCase().includes(term) ||
+            (p.ic || '').toLowerCase().includes(term)
         );
     }
 
     // Category
     const catVal = categoryFilter.value;
     if (catVal !== 'All Categories') {
-        filtered = filtered.filter(r => classifyIncome(r.income) === catVal);
+        filtered = filtered.filter(p => classifyIncome(p.householdIncome) === catVal);
     }
 
     residentsPaginator.update(filtered, { resetLimit: resetPagination });
@@ -258,6 +317,7 @@ function applyFilters(resetPagination = false) {
 
 if (searchInput) searchInput.addEventListener('input', () => applyFilters(true));
 if (categoryFilter) categoryFilter.addEventListener('change', () => applyFilters(true));
+if (residentTypeFilter) residentTypeFilter.addEventListener('change', () => applyFilters(true));
 
 // ============ ADD / EDIT MODAL ============
 

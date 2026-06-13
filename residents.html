@@ -140,11 +140,19 @@
                     <input type="text" placeholder="Search by name or IC number...">
                 </div>
                 <div class="filter-wrapper">
-                    <select>
+                    <select id="categoryFilter">
                         <option>All Categories</option>
                         <option>B40</option>
                         <option>M40</option>
                         <option>T20</option>
+                    </select>
+                </div>
+                <div class="filter-wrapper">
+                    <select id="residentTypeFilter">
+                        <option value="all">All Residents</option>
+                        <option value="head">Head of Household Only</option>
+                        <option value="elderly">Elderly (60+)</option>
+                        <option value="underage">Underage (Under 18)</option>
                     </select>
                 </div>
             </div>
