@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyKolong2 Hub - Aid</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <link rel="stylesheet" href="css/modals.css">
+</head>
+
+<body class="dashboard-body">
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo-box-small">
+                <i data-lucide="home" class="logo-icon-small"></i>
+            </div>
+            <div class="nav-brand">
+                <h2>MyKolong2 Hub</h2>
+                <span>Village Management System</span>
+            </div>
+        </div>
+
+        <div class="nav-center">
+            <a href="dashboard.html" class="nav-link">
+                <i data-lucide="layout-dashboard"></i> Dashboard
+            </a>
+            <a href="residents.html" class="nav-link">
+                <i data-lucide="users"></i> Residents
+            </a>
+            <a href="welfare.html" class="nav-link">
+                <i data-lucide="heart"></i> Welfare
+            </a>
+            <a href="inventory.html" class="nav-link active">
+                <i data-lucide="package"></i> Aid
+            </a>
+            <a href="analytics.html" class="nav-link">
+                <i data-lucide="bar-chart-2"></i> Analytics
+            </a>
+            <a href="admin.html" class="nav-link">
+                <i data-lucide="settings"></i> Admin
+            </a>
+            <a href="transparency.html" class="nav-link">
+                <i data-lucide="shield"></i> Transparency
+            </a>
+        </div>
+
+        <div class="nav-right">
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name">Admin User</span>
+                    <span class="user-role">Admin</span>
+                </div>
+                <div class="user-avatar">
+                    <i data-lucide="user"></i>
+                </div>
+            </div>
+            <a href="signin.html" class="logout-btn">
+                <i data-lucide="log-out"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header flex-header">
+            <div>
+                <h1>Welfare Aid</h1>
+                <p>Record and manage the types of assistance and their eligibilities</p>
+            </div>
+        </header>
+
+        <!-- Summary Cards Row -->
+        <section class="kpi-grid summary-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 600px; margin-bottom: 2rem;">
+            <div class="kpi-card mini-card">
+                <div class="mini-kpi-value text-dark" id="kpi-total-items">0</div>
+                <div class="mini-kpi-label">Total Aid Programs</div>
+            </div>
+            <div class="kpi-card mini-card">
+                <div class="mini-kpi-value text-red" id="kpi-low-stock">0</div>
+                <div class="mini-kpi-label">Low Stock Alerts</div>
+            </div>
+        </section>
+
+        <!-- Table Container -->
+        <div class="dashboard-card" style="padding: 0; overflow: hidden;">
+            <div class="table-header-area" style="padding: 1.5rem;">
+                <div>
+                    <h3 style="font-size: 1.1rem; color: #1e293b;">Active Aid</h3>
+                    <p style="font-size: 0.85rem; color: #64748b;">Manage assistance to be distributed</p>
+                </div>
+                <div class="table-actions">
+                    <button class="btn btn-primary btn-sm" id="openAddModalBtn">
+                        <i data-lucide="plus"></i> Add Aid Item
+                    </button>
+                </div>
+            </div>
+
+            <!-- The Table -->
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Aid Name</th>
+                            <th>Type</th>
+                            <th>Target Eligibility</th>
+                            <th>Quantity Available</th>
+                            <th>Status</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody">
+                        <tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">Loading inventory...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="inventoryPagination"></div>
+        </div>
+
+        <!-- Dashboard Footer -->
+        <footer class="dashboard-footer">
+            <p>MyKolong2 Hub &copy; 2026 - Empowering Rural Communities Through Technology</p>
+        </footer>
+    </main>
+
+    <!-- Add/Edit Modal Overlay -->
+    <div class="modal-overlay" id="inventoryModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <div>
+                    <h2 id="modalTitle">Add Aid Item</h2>
+                    <p>Fill in the details for the inventory.</p>
+                </div>
+                <button type="button" class="close-modal-btn" id="closeModalBtn"><i data-lucide="x"></i></button>
+            </div>
+            
+            <form id="inventoryForm" class="modal-form">
+                <div class="form-group">
+                    <label for="fName">Aid Name (e.g. Bakul Makanan)</label>
+                    <input type="text" id="fName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fType">Type of Assistance</label>
+                    <div class="select-wrapper">
+                        <select id="fType" required>
+                            <option value="" disabled selected>Select Type</option>
+                            <option value="Physical Goods">Physical Goods</option>
+                            <option value="Monetary">Monetary</option>
+                            <option value="School Supplies">School Supplies</option>
+                            <option value="Medical">Medical / Healthcare</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="select-icon"></i>
+                    </div>
+                </div>
+
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="fEligibility">Target Eligibility</label>
+                        <div class="select-wrapper">
+                            <select id="fEligibility" required>
+                                <option value="All" selected>All Residents</option>
+                                <option value="B40">B40 Only</option>
+                                <option value="M40">M40 Only</option>
+                                <option value="OKU">OKU Only</option>
+                                <option value="Warga Emas">Warga Emas (60+)</option>
+                                <option value="Schoolers">Schoolers (Kindergarten/Primary/High)</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="select-icon"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="fQuantity">Quantity Available</label>
+                        <input type="number" id="fQuantity" min="0" required>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase & Main Script -->
+    <script type="module">
+        import { requireAuth, setupLogoutButton, updateUserDisplay } from "./js/auth.js";
+        import { initInventory } from "./js/inventory.js";
+
+        // Initialize Lucide icons
+        try {
+            lucide.createIcons();
+        } catch (e) {
+            console.warn("Lucide icons failed to load:", e);
+        }
+
+        // Protect page
+        const user = await requireAuth();
+        updateUserDisplay(user);
+        setupLogoutButton();
+
+        // Initialize Module
+        initInventory();
+    </script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyKolong2 Hub - Sign Up</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+
+<body class="auth-body">
+    <div class="page-container">
+        <header class="page-header">
+            <div class="logo-box">
+                <i data-lucide="home" class="logo-icon"></i>
+            </div>
+            <h1>MyKolong2 Hub</h1>
+            <p>Create your account</p>
+        </header>
+
+        <main class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i data-lucide="user-plus" class="title-icon"></i>
+                    <h2>Sign Up</h2>
+                </div>
+                <p class="card-subtitle">Join the MyKolong2 Hub community</p>
+            </div>
+
+            <form class="signup-form">
+                <div class="form-row two-cols">
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="user" class="input-icon"></i>
+                            <input type="text" id="fullName" placeholder="Enter your full name">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="mail" class="input-icon"></i>
+                            <input type="email" id="email" placeholder="you@example.com">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row two-cols">
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="lock" class="input-icon"></i>
+                            <input type="password" id="password" placeholder="At least 6 characters">
+                            <button type="button" class="eye-btn" aria-label="Toggle password visibility">
+                                <i data-lucide="eye" class="eye-icon icon-show"></i>
+                                <i data-lucide="eye-off" class="eye-icon icon-hide" style="display: none;"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="lock" class="input-icon"></i>
+                            <input type="password" id="confirmPassword" placeholder="Re-enter password">
+                            <button type="button" class="eye-btn" aria-label="Toggle password visibility">
+                                <i data-lucide="eye" class="eye-icon icon-show"></i>
+                                <i data-lucide="eye-off" class="eye-icon icon-hide" style="display: none;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="accountType">Account Type</label>
+                    <div class="select-wrapper">
+                        <select id="accountType">
+                            <option value="resident">Resident</option>
+                            <option value="admin">Admin</option>
+                            <!-- Can add more if needed -->
+                        </select>
+                        <i data-lucide="chevron-down" class="select-icon"></i>
+                    </div>
+                    <p class="field-hint">View personal data and welfare information</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="icNumber">IC Number</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="credit-card" class="input-icon"></i>
+                        <input type="text" id="icNumber" placeholder="YYMMDD-XX-XXXX">
+                    </div>
+                    <p class="field-hint">Required for resident accounts</p>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create Account</button>
+
+                <div class="divider">
+                    <span>Already have an account?</span>
+                </div>
+
+                <!-- Taking a guess on the "Sign In" style since it's cut off, likely an outline or secondary button -->
+                <a href="signin.html" class="btn btn-outline" style="text-decoration: none;">Sign In</a>
+            </form>
+        </main>
+
+        <footer class="page-footer">
+            <p>&copy; 2026 MyKolong2 Hub. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script type="module">
+        import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+        import { doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+        import { auth, db } from "./js/firebase-config.js";
+        import { redirectIfLoggedIn } from "./js/auth.js";
+
+        // Initialize Lucide icons
+        try {
+            lucide.createIcons();
+        } catch (e) {
+            console.error("Lucide icons failed to initialize:", e);
+        }
+
+        // If already logged in, go to dashboard
+        redirectIfLoggedIn();
+
+        // Setup password toggles
+        document.querySelectorAll('.eye-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const wrapper = this.closest('.input-wrapper');
+                const input = wrapper.querySelector('input');
+                const iconShow = this.querySelector('.icon-show');
+                const iconHide = this.querySelector('.icon-hide');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    iconShow.style.display = 'none';
+                    iconHide.style.display = 'block';
+                } else {
+                    input.type = 'password';
+                    iconShow.style.display = 'block';
+                    iconHide.style.display = 'none';
+                }
+            });
+        });
+
+        // Sign Up Form Handler
+        const form = document.querySelector('.signup-form');
+        const submitBtn = form.querySelector('button[type="submit"]');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const accountType = document.getElementById('accountType').value;
+            const icNumber = document.getElementById('icNumber').value.trim();
+
+            // Remove any previous error
+            const prevError = form.querySelector('.form-error');
+            if (prevError) prevError.remove();
+
+            // Validation
+            if (!fullName || !email || !password) {
+                showError('Please fill in all required fields.');
+                return;
+            }
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters.');
+                return;
+            }
+            if (password !== confirmPassword) {
+                showError('Passwords do not match.');
+                return;
+            }
+
+            // Disable button during submission
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating Account...';
+
+            try {
+                // Create user in Firebase Auth
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Update display name
+                await updateProfile(user, { displayName: fullName });
+
+                // Save additional info to Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    fullName: fullName,
+                    email: email,
+                    accountType: accountType,
+                    icNumber: icNumber,
+                    createdAt: new Date().toISOString()
+                });
+
+                // Redirect to dashboard
+                window.location.href = "dashboard.html";
+
+            } catch (error) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Account';
+
+                // Map Firebase errors to user-friendly messages
+                const errorMessages = {
+                    'auth/email-already-in-use': 'This email is already registered. Please sign in instead.',
+                    'auth/invalid-email': 'Please enter a valid email address.',
+                    'auth/weak-password': 'Password is too weak. Use at least 6 characters.',
+                };
+
+                showError(errorMessages[error.code] || 'Error: ' + error.code + ' — ' + error.message);
+                console.error('Firebase Error:', error.code, error.message);
+            }
+        });
+
+        function showError(message) {
+            const prevError = form.querySelector('.form-error');
+            if (prevError) prevError.remove();
+
+            const errorEl = document.createElement('div');
+            errorEl.className = 'form-error';
+            errorEl.style.cssText = 'background: #fee2e2; color: #dc2626; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; text-align: center;';
+            errorEl.textContent = message;
+            form.insertBefore(errorEl, submitBtn);
+        }
+    </script>
+</body>
+
+</html>

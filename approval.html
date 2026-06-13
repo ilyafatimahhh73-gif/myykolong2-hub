@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approval Gateway - MyKolong2 Hub</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <style>
+        .draft-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .draft-info h3 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1.1rem;
+            color: #0f172a;
+        }
+
+        .draft-info p {
+            margin: 0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .draft-status {
+            background-color: #fef08a;
+            color: #854d0e;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .details-view {
+            display: none;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .details-view.active {
+            display: block;
+        }
+
+        .xai-log {
+            font-family: monospace;
+            background-color: #f8fafc;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #334155;
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        .incomplete-row {
+            background-color: #fef2f2 !important;
+            border-left: 4px solid #ef4444;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+
+<body class="dashboard-body">
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo-box-small">
+                <i data-lucide="home" class="logo-icon-small"></i>
+            </div>
+            <div class="nav-brand">
+                <h2>MyKolong2 Hub</h2>
+                <span>Village Management System</span>
+            </div>
+        </div>
+
+        <div class="nav-center">
+            <a href="dashboard.html" class="nav-link">
+                <i data-lucide="layout-dashboard"></i>
+                Dashboard
+            </a>
+            <a href="residents.html" class="nav-link">
+                <i data-lucide="users"></i>
+                Residents
+            </a>
+            <a href="welfare.html" class="nav-link">
+                <i data-lucide="heart"></i>
+                Welfare
+            </a>
+            <a href="analytics.html" class="nav-link">
+                <i data-lucide="bar-chart-2"></i>
+                Analytics
+            </a>
+            <a href="approval.html" class="nav-link active">
+                <i data-lucide="check-circle"></i>
+                Approvals
+            </a>
+            <a href="admin.html" class="nav-link">
+                <i data-lucide="settings"></i>
+                Admin
+            </a>
+        </div>
+
+        <div class="nav-right">
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name">Ketua Kampung</span>
+                    <span class="user-role">Approver</span>
+                </div>
+                <div class="user-avatar">
+                    <i data-lucide="user"></i>
+                </div>
+            </div>
+            <a href="signin.html" class="logout-btn">
+                <i data-lucide="log-out"></i>
+                Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>Approval Gateway</h1>
+            <p>Review and approve AI-generated welfare distribution drafts.</p>
+        </header>
+
+        <!-- Pending Drafts List -->
+        <section class="dashboard-card full-width-card">
+            <div class="card-title-area" style="margin-bottom: 1.5rem;">
+                <h3>Pending Distributions</h3>
+                <p>Select a draft to view the ranked priority list and XAI reason logs.</p>
+            </div>
+            <div id="draftsListContainer">
+                <div style="text-align: center; padding: 2rem; color: #94a3b8;">
+                    <i data-lucide="loader" class="spin"></i> Loading pending drafts...
+                </div>
+            </div>
+            <div id="draftsPagination"></div>
+        </section>
+
+        <!-- Details View -->
+        <section id="draftDetailsView" class="details-view">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+                <div>
+                    <h2 id="detailTitle" style="margin: 0 0 0.5rem 0; color: #0f172a;">Draft Details</h2>
+                    <p id="detailSubtitle" style="margin: 0; color: #64748b;">Review the AI priority ranking and logs.
+                    </p>
+                </div>
+                <button class="btn btn-outline btn-sm" id="closeDetailsBtn">
+                    <i data-lucide="x"></i> Close
+                </button>
+            </div>
+
+            <!-- Exception Subroutine Warning -->
+            <div id="exceptionWarning" class="welfare-alert-banner"
+                style="display: none; background-color: #fef2f2; border: 1px solid #fca5a5; margin-bottom: 1.5rem;">
+                <i data-lucide="alert-triangle" class="text-dark-red"></i>
+                <div class="welfare-alert-content">
+                    <h4 style="color: #991b1b;">Data Exception Detected</h4>
+                    <p style="color: #b91c1c;">One or more profiles have missing or corrupted mandatory attributes. They
+                        have been isolated below. Please flag for manual census data remediation.</p>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">Rank</th>
+                            <th>Resident Name</th>
+                            <th>Metrics</th>
+                            <th>XAI Reason Log</th>
+                        </tr>
+                    </thead>
+                    <tbody id="draftRecipientsBody">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="recipientsPagination"></div>
+
+            <div class="btn-group">
+                <button class="btn btn-outline" id="rejectBtn" style="color: #ef4444; border-color: #fca5a5;">
+                    <i data-lucide="x-circle"></i> Reject (Require Recalculation)
+                </button>
+                <button class="btn btn-primary" id="approveBtn" style="background-color: #10b981;">
+                    <i data-lucide="check-circle"></i> Approve Distribution
+                </button>
+            </div>
+        </section>
+
+        <!-- Success Banner -->
+        <div id="successBanner"
+            style="display: none; background-color: #d1fae5; border: 1px solid #6ee7b7; padding: 1rem; border-radius: 8px; margin-top: 2rem; color: #065f46; align-items: center; gap: 0.5rem;">
+            <i data-lucide="check-circle"></i> <span>Action completed successfully.</span>
+        </div>
+
+    </main>
+
+    <script type="module" src="./js/approval.js"></script>
+</body>
+
+</html>

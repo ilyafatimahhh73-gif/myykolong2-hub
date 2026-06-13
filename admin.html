@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - MyKolong2 Hub</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="dashboard-body">
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo-box-small">
+                <i data-lucide="home" class="logo-icon-small"></i>
+            </div>
+            <div class="nav-brand">
+                <h2>MyKolong2 Hub</h2>
+                <span>Village Management System</span>
+            </div>
+        </div>
+
+        <div class="nav-center">
+            <a href="dashboard.html" class="nav-link">
+                <i data-lucide="layout-dashboard"></i>
+                Dashboard
+            </a>
+            <a href="residents.html" class="nav-link">
+                <i data-lucide="users"></i>
+                Residents
+            </a>
+            <a href="welfare.html" class="nav-link">
+                <i data-lucide="heart"></i>
+                Welfare
+            </a>
+            <a href="inventory.html" class="nav-link">
+                <i data-lucide="package"></i>
+                Aid
+            </a>
+            <a href="analytics.html" class="nav-link">
+                <i data-lucide="bar-chart-2"></i>
+                Analytics
+            </a>
+            <a href="admin.html" class="nav-link active">
+                <i data-lucide="settings"></i>
+                Admin
+            </a>
+            <a href="transparency.html" class="nav-link">
+                <i data-lucide="shield"></i>
+                Transparency
+            </a>
+        </div>
+
+        <div class="nav-right">
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name">Admin User</span>
+                    <span class="user-role">Admin</span>
+                </div>
+                <div class="user-avatar">
+                    <i data-lucide="user"></i>
+                </div>
+            </div>
+            <a href="signin.html" class="logout-btn">
+                <i data-lucide="log-out"></i>
+                Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1>Admin Panel</h1>
+            <p>System management and administrative controls</p>
+        </header>
+
+        <!-- KPI Grid -->
+        <section class="admin-kpi-grid">
+            <div class="dashboard-card mini-card" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div class="kpi-value text-dark" style="font-size: 1.5rem;" id="admin-total-records">0</div>
+                    <div class="mini-kpi-label">Total Records</div>
+                </div>
+                <i data-lucide="database" class="icon-blue" style="width: 28px; height: 28px;"></i>
+            </div>
+            
+            <div class="dashboard-card mini-card" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div class="kpi-value text-dark-orange" style="font-size: 1.5rem; color: #d97706;">2</div>
+                    <div class="mini-kpi-label">Pending Approvals</div>
+                </div>
+                <i data-lucide="clock" class="icon-orange" style="width: 28px; height: 28px;"></i>
+            </div>
+            
+            <div class="dashboard-card mini-card" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div class="kpi-value text-dark-green" style="font-size: 1.5rem; color: #10b981;">99.2%</div>
+                    <div class="mini-kpi-label">System Uptime</div>
+                </div>
+                <i data-lucide="check-circle" class="icon-green" style="width: 28px; height: 28px;"></i>
+            </div>
+            
+            <div class="dashboard-card mini-card" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div class="kpi-value text-dark" style="font-size: 1.5rem;">2.1 GB</div>
+                    <div class="mini-kpi-label">Database Size</div>
+                </div>
+                <i data-lucide="shield" class="icon-purple" style="width: 28px; height: 28px;"></i>
+            </div>
+        </section>
+
+        <!-- Pending Approvals -->
+        <section class="pending-panel">
+            <div class="pending-header">
+                <i data-lucide="clock"></i> Pending Approvals
+            </div>
+            <p class="pending-desc">Items requiring administrative review</p>
+            
+            <div class="approval-list">
+                <div class="approval-item">
+                    <div class="approval-info">
+                        <h4>Income revision for 3 households</h4>
+                        <p>Data Update</p>
+                    </div>
+                    <div class="approval-actions">
+                        <span class="approval-badge high">high</span>
+                        <button class="btn-review">Review</button>
+                    </div>
+                </div>
+                
+                <div class="approval-item">
+                    <div class="approval-info">
+                        <h4>B40 classification verification needed</h4>
+                        <p>Welfare Review</p>
+                    </div>
+                    <div class="approval-actions">
+                        <span class="approval-badge medium">medium</span>
+                        <button class="btn-review">Review</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Tabs -->
+        <div class="admin-tabs-nav">
+            <button class="tab-btn active" data-tab="tab-data-management">Data Management</button>
+            <button class="tab-btn" data-tab="tab-system-settings">System Settings</button>
+            <button class="tab-btn" data-tab="tab-activity-logs">Activity Logs</button>
+        </div>
+
+        <!-- Tab 1: Data Management -->
+        <section id="tab-data-management" class="tab-content active">
+            <div class="data-columns">
+                <!-- Data Export -->
+                <div class="dashboard-card">
+                    <div class="data-section-title">Data Export</div>
+                    <p class="data-section-desc">Download data for backup or analysis</p>
+                    
+                    <div class="export-list">
+                        <button class="btn-export"><i data-lucide="upload"></i> Export Resident Database</button>
+                        <button class="btn-export"><i data-lucide="upload"></i> Export Welfare Classifications</button>
+                        <button class="btn-export"><i data-lucide="upload"></i> Export Analytics Report</button>
+                        <button class="btn-export"><i data-lucide="upload"></i> Export Complete Database</button>
+                    </div>
+                </div>
+
+                <!-- Data Import -->
+                <div class="dashboard-card">
+                    <div class="data-section-title">Data Import</div>
+                    <p class="data-section-desc">Upload and import data from external sources</p>
+                    
+                    <div class="upload-zone">
+                        <i data-lucide="download" class="upload-icon" style="width: 36px; height: 36px;"></i>
+                        <div class="upload-text">Drop CSV file here or click to browse</div>
+                        <input type="file" id="fileUpload" style="display: none;" accept=".csv,.xlsx">
+                        <button class="btn-choose-file" onclick="document.getElementById('fileUpload').click()"><i data-lucide="download" style="width: 14px; height: 14px;"></i> Choose File</button>
+                    </div>
+                    
+                    <div class="import-options">
+                        <label>Import Type</label>
+                        <select class="import-select">
+                            <option>Resident Data</option>
+                            <option>Welfare Data</option>
+                            <option>Settings Mapping</option>
+                        </select>
+                        <p class="import-help">Supported formats: CSV, Excel (.xlsx). Maximum file size: 10MB</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 2: System Settings -->
+        <section id="tab-system-settings" class="tab-content">
+            <!-- Classification Engine -->
+            <div class="settings-panel">
+                <div class="settings-header">
+                    <div class="settings-panel-title">Welfare Classification Engine</div>
+                    <div class="settings-panel-desc">Automated household categorization system</div>
+                </div>
+                
+                <div class="engine-state">
+                    <div class="engine-info">
+                        <span>Last Run</span>
+                        <div class="date">March 9, 2026 at 06:00 AM</div>
+                        <div class="success-text"><i data-lucide="check"></i> Classified 5 households successfully</div>
+                    </div>
+                    <button class="btn-dark-icon"><i data-lucide="refresh-cw"></i> Run Classification</button>
+                </div>
+
+                <div class="small-stats-grid">
+                    <div class="small-stat-card b40">
+                        <div class="val" id="admin-b40">0</div>
+                        <div class="lab">B40 Households</div>
+                    </div>
+                    <div class="small-stat-card m40">
+                        <div class="val" id="admin-m40">0</div>
+                        <div class="lab">M40 Households</div>
+                    </div>
+                    <div class="small-stat-card t20">
+                        <div class="val" id="admin-t20">0</div>
+                        <div class="lab">T20 Households</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Database Backup -->
+            <div class="settings-panel">
+                <div class="settings-header">
+                    <div class="settings-panel-title">Database Backup</div>
+                    <div class="settings-panel-desc">Protect your data with regular backups</div>
+                </div>
+
+                <div class="engine-state backup-state">
+                    <div class="engine-info">
+                        <span class="title"><i data-lucide="check-circle"></i> Last Backup</span>
+                        <div class="date">March 9, 2026 at 02:00 AM</div>
+                        <div class="date" style="margin-top: 0;">Size: 2.1 GB &bull; 1,284 records</div>
+                    </div>
+                    <button class="btn-dark-icon"><i data-lucide="database"></i> Backup Now</button>
+                </div>
+
+                <div class="import-options" style="margin-top: 1rem;">
+                    <label>Backup Frequency</label>
+                    <select class="import-select" style="margin-bottom: 0;">
+                        <option>Daily</option>
+                        <option>Weekly</option>
+                        <option>Monthly</option>
+                        <option>Manual Only</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 3: Activity Logs Placeholder -->
+        <section id="tab-activity-logs" class="tab-content">
+            <div class="dashboard-card" style="text-align: center; padding: 4rem 2rem;">
+                <i data-lucide="clipboard-list" style="width: 48px; height: 48px; color: #cbd5e1; margin-bottom: 1rem;"></i>
+                <h3 style="color: #475569; margin-bottom: 0.5rem;">Activity Logs</h3>
+                <p style="color: #94a3b8;">System event monitoring will appear here in future updates.</p>
+            </div>
+        </section>
+
+        <!-- Dashboard Footer -->
+        <footer class="dashboard-footer">
+            <p>MyKolong2 Hub &copy; 2026 - Empowering Rural Communities Through Technology</p>
+        </footer>
+    </main>
+
+    <script type="module" src="./js/admin-dashboard.js"></script>
+</body>
+</html>

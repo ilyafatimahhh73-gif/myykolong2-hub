@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transparency Portal - MyKolong2 Hub</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/admin.css"> <!-- Reusing tabs styling -->
+    <link rel="stylesheet" href="css/transparency.css">
+</head>
+<body class="dashboard-body">
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo-box-small">
+                <i data-lucide="home" class="logo-icon-small"></i>
+            </div>
+            <div class="nav-brand">
+                <h2>MyKolong2 Hub</h2>
+                <span>Village Management System</span>
+            </div>
+        </div>
+
+        <div class="nav-center">
+            <a href="dashboard.html" class="nav-link">
+                <i data-lucide="layout-dashboard"></i>
+                Dashboard
+            </a>
+            <a href="residents.html" class="nav-link">
+                <i data-lucide="users"></i>
+                Residents
+            </a>
+            <a href="welfare.html" class="nav-link">
+                <i data-lucide="heart"></i>
+                Welfare
+            </a>
+            <a href="inventory.html" class="nav-link">
+                <i data-lucide="package"></i>
+                Aid
+            </a>
+            <a href="analytics.html" class="nav-link">
+                <i data-lucide="bar-chart-2"></i>
+                Analytics
+            </a>
+            <a href="admin.html" class="nav-link">
+                <i data-lucide="settings"></i>
+                Admin
+            </a>
+            <a href="transparency.html" class="nav-link active">
+                <i data-lucide="shield"></i>
+                Transparency
+            </a>
+        </div>
+
+        <div class="nav-right">
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name">Admin User</span>
+                    <span class="user-role">Admin</span>
+                </div>
+                <div class="user-avatar">
+                    <i data-lucide="user"></i>
+                </div>
+            </div>
+            <a href="signin.html" class="logout-btn">
+                <i data-lucide="log-out"></i>
+                Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1>Transparency Portal</h1>
+            <p>Understand how welfare decisions are made</p>
+        </header>
+
+        <!-- Trust Banner -->
+        <div class="trust-banner">
+            <i data-lucide="shield" style="width: 24px; height: 24px;"></i>
+            <div class="trust-content">
+                <h3>Building Trust Through Transparency</h3>
+                <p>This portal provides clear explanations of how welfare classifications are determined and why certain households receive aid priority. Every decision is based on objective criteria and you can see exactly how your household's factors are evaluated.</p>
+            </div>
+        </div>
+
+        <!-- KPI Grid -->
+        <section class="transparency-kpi-grid">
+            <div class="kpi-card-transparent">
+                <div>
+                    <div class="kpi-value text-dark" style="font-size: 1.75rem; margin-bottom: 0.25rem;">3</div>
+                    <div class="mini-kpi-label">Decisions Explained</div>
+                </div>
+                <i data-lucide="file-text" class="icon-blue"></i>
+            </div>
+            
+            <div class="kpi-card-transparent">
+                <div>
+                    <div class="kpi-value text-dark-green" style="font-size: 1.75rem; color: #10b981; margin-bottom: 0.25rem;">100%</div>
+                    <div class="mini-kpi-label">Objective Criteria</div>
+                </div>
+                <i data-lucide="check-circle" class="icon-green"></i>
+            </div>
+            
+            <div class="kpi-card-transparent">
+                <div>
+                    <div class="kpi-value text-dark" style="font-size: 1.75rem; color: #a855f7; margin-bottom: 0.25rem;">4</div>
+                    <div class="mini-kpi-label">Key Factors</div>
+                </div>
+                <i data-lucide="info" class="icon-purple"></i>
+            </div>
+        </section>
+
+        <!-- Tabs -->
+        <div class="admin-tabs-nav">
+            <button class="tab-btn active" data-tab="tab-decisions">Decision Explanations</button>
+            <button class="tab-btn" data-tab="tab-criteria">Classification Criteria</button>
+            <button class="tab-btn" data-tab="tab-faqs">Frequently Asked Questions</button>
+        </div>
+
+        <!-- Tab 1: Decisions -->
+        <section id="tab-decisions" class="tab-content active">
+            <div class="dashboard-card" style="margin-bottom: 2rem;">
+                <div class="card-title-area" style="margin-bottom: 1.25rem;">
+                    <h3>Welfare Decision Explanations</h3>
+                    <p>See how each household's welfare status was determined</p>
+                </div>
+
+                <input type="text" id="searchInput" class="transparency-search" placeholder="Search by name or IC number...">
+
+                <div class="decision-list" id="decisionList">
+                    <!-- Card 1 -->
+                    <div class="decision-card">
+                        <div class="decision-header">
+                            <div class="decision-title-area">
+                                <h4>Ahmad bin Abdullah</h4>
+                                <span class="approval-badge high" style="background-color: #fee2e2; color: #ef4444; border-radius: 4px; font-size: 0.70rem;">B40</span>
+                            </div>
+                            <button class="btn-icon-text"><i data-lucide="eye"></i> View Details</button>
+                        </div>
+                        <div class="decision-meta">
+                            <div class="meta-row">IC: 850123-10-5678</div>
+                            <div class="meta-row result">Eligible for Aid - Priority Level: High</div>
+                            <div class="meta-row" style="font-size: 0.8rem;">Decision Date: 3/5/2026</div>
+                        </div>
+                        <div class="decision-grid">
+                            <div class="dg-item">
+                                <span class="dg-label">Household Income</span>
+                                <span class="dg-value">RM 2,800</span>
+                            </div>
+                            <div class="dg-item">
+                                <span class="dg-label">Number of Dependents</span>
+                                <span class="dg-value">4</span>
+                            </div>
+                            <div class="dg-item">
+                                <span class="dg-label">Per Capita Income</span>
+                                <span class="dg-value">RM 560</span>
+                            </div>
+                            <div class="dg-item">
+                                <span class="dg-label">Vulnerabilities</span>
+                                <span class="dg-value">Elderly Member</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="decision-card">
+                        <div class="decision-header">
+                            <div class="decision-title-area">
+                                <h4>Siti Aminah binti Hassan</h4>
+                                <span class="approval-badge medium" style="background-color: #fef3c7; color: #d97706; border-radius: 4px; font-size: 0.70rem;">M40</span>
+                            </div>
+                            <button class="btn-icon-text"><i data-lucide="eye"></i> View Details</button>
+                        </div>
+                        <div class="decision-meta">
+                            <div class="meta-row">IC: 780515-08-2345</div>
+                            <div class="meta-row result" style="font-weight: 600;">Not Eligible for Aid - Stable Economic Status</div>
+                            <div class="meta-row" style="font-size: 0.8rem;">Decision Date: 3/6/2026</div>
+                        </div>
+                        <div class="decision-grid">
+                            <div class="dg-item">
+                                <span class="dg-label">Household Income</span>
+                                <span class="dg-value">RM 5,200</span>
+                            </div>
+                            <div class="dg-item">
+                                <span class="dg-label">Number of Dependents</span>
+                                <span class="dg-value">2</span>
+                            </div>
+                            <div class="dg-item">
+                                <span class="dg-label">Per Capita Income</span>
+                                <span class="dg-value">RM 1,733</span>
+                            </div>
+                            <div class="dg-item">
+                                <span class="dg-label">Vulnerabilities</span>
+                                <span class="dg-value">None</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="decision-card">
+                        <div class="decision-header">
+                            <div class="decision-title-area">
+                                <h4>Fatimah binti Ibrahim</h4>
+                                <span class="approval-badge high" style="background-color: #fee2e2; color: #ef4444; border-radius: 4px; font-size: 0.70rem;">B40</span>
+                            </div>
+                            <button class="btn-icon-text"><i data-lucide="eye"></i> View Details</button>
+                        </div>
+                        <div class="decision-meta">
+                            <div class="meta-row">IC: 881127-05-6789</div>
+                            <div class="meta-row result">Eligible for Aid - Priority Level: Very High</div>
+                            <div class="meta-row" style="font-size: 0.8rem;">Decision Date: 3/6/2026</div>
+                        </div>
+                        <div class="decision-grid">
+                            <div class="dg-item">
+                                <span class="dg-label">Household Income</span>
+                                <span class="dg-value">RM 1,900</span>
+                            </div>
+                            <div class="dg-item">
+                                <span class="dg-label">Number of Dependents</span>
+                                <span class="dg-value">5</span>
+                            </div>
+                            <div class="dg-item">
+                                <span class="dg-label">Per Capita Income</span>
+                                <span class="dg-value">RM 317</span>
+                            </div>
+                            <div class="dg-item">
+                                <span class="dg-label">Vulnerabilities</span>
+                                <span class="dg-value">None</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 2: Criteria -->
+        <section id="tab-criteria" class="tab-content">
+            <div class="dashboard-card" style="margin-bottom: 2rem;">
+                <div class="criteria-header">
+                    <h3 class="criteria-section-title">Classification Criteria & Methodology</h3>
+                    <p style="color: #64748b; font-size: 0.95rem;">How we determine B40, M40, and T20 categories</p>
+                </div>
+
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem;">Income Thresholds</h4>
+                
+                <div class="threshold-panel b40">
+                    <div class="tp-header">
+                        <span class="tp-title">Node 1: Income Classification (B40 / M40 / T20)</span>
+                    </div>
+                    <div class="tp-desc">The first split in the tree determines the base national category using strict monthly household income thresholds (B40 < RM 4,850, M40 up to RM 10,970).</div>
+                </div>
+
+                <div class="threshold-panel m40">
+                    <div class="tp-header">
+                        <span class="tp-title">Node 2: Economic Strain (Per Capita & Dependents)</span>
+                    </div>
+                    <div class="tp-desc">Within the income group, the tree evaluates the number of dependents and per capita income. For example, a B40 household with ≥ 5 dependents or per capita income ≤ RM 500 is immediately routed to the highest priority branch.</div>
+                </div>
+
+                <div class="threshold-panel t20">
+                    <div class="tp-header">
+                        <span class="tp-title">Node 3: Household Vulnerability (OKU & Elderly)</span>
+                    </div>
+                    <div class="tp-desc">The final branch checks for the presence of disabled (OKU) or elderly (60+) members. Households meeting these criteria are elevated to a higher priority branch, ensuring vulnerable groups are not left behind.</div>
+                </div>
+
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-top: 2rem; margin-bottom: 1rem;">Final Priority Outcomes</h4>
+                
+                <div class="factors-grid">
+                    <div class="factor-card" style="border-top: 3px solid #ef4444;">
+                        <span class="approval-badge" style="background-color: #fee2e2; color: #ef4444; border-radius: 4px; font-size: 0.70rem; padding: 2px 6px;">Very High / High</span>
+                        <h4 style="margin-top: 0.5rem;">Immediate Aid</h4>
+                        <p>B40 households facing severe economic strain or containing vulnerable members.</p>
+                    </div>
+                    <div class="factor-card" style="border-top: 3px solid #d97706;">
+                        <span class="approval-badge" style="background-color: #fef3c7; color: #d97706; border-radius: 4px; font-size: 0.70rem; padding: 2px 6px;">Medium / Low</span>
+                        <h4 style="margin-top: 0.5rem;">Targeted Support</h4>
+                        <p>Stable B40 households, or M40 households experiencing specific vulnerabilities.</p>
+                    </div>
+                    <div class="factor-card" style="border-top: 3px solid #64748b;">
+                        <span class="approval-badge" style="background-color: #f1f5f9; color: #64748b; border-radius: 4px; font-size: 0.70rem; padding: 2px 6px;">Not Eligible</span>
+                        <h4 style="margin-top: 0.5rem;">Stable Status</h4>
+                        <p>Financially stable households (M40/T20) without extraordinary compounding factors.</p>
+                    </div>
+                </div>
+
+                <div class="trust-banner" style="margin-bottom: 0;">
+                    <i data-lucide="shield" style="width: 24px; height: 24px;"></i>
+                    <div class="trust-content">
+                        <h3>Our Transparency Commitment</h3>
+                        <p style="font-size: 0.85rem;">All classifications are made using objective, data-driven criteria applied equally to all households. There is no subjective bias in the automated classification system. Every decision can be explained and reviewed upon request.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 3: FAQs -->
+        <section id="tab-faqs" class="tab-content">
+            <div class="dashboard-card" style="margin-bottom: 2rem;">
+                <div class="criteria-header">
+                    <h3 class="criteria-section-title">Frequently Asked Questions</h3>
+                    <p style="color: #64748b; font-size: 0.95rem;">Common questions about welfare classification and decisions</p>
+                </div>
+
+                <div class="faq-container">
+                    <div class="faq-item active">
+                        <div class="faq-header">
+                            <div class="faq-header-left">
+                                <i data-lucide="help-circle"></i>
+                                How is my household classified?
+                            </div>
+                            <i data-lucide="chevron-down" class="faq-icon-toggle"></i>
+                        </div>
+                        <div class="faq-body">
+                            Households are automatically classified into B40, M40, or T20 categories based on monthly household income. B40 (Bottom 40%): Below RM 4,850/month. M40 (Middle 40%): RM 4,851 - RM 10,970/month. T20 (Top 20%): Above RM 10,971/month.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-header">
+                            <div class="faq-header-left">
+                                <i data-lucide="help-circle"></i>
+                                What factors determine aid eligibility?
+                            </div>
+                            <i data-lucide="chevron-down" class="faq-icon-toggle"></i>
+                        </div>
+                        <div class="faq-body">
+                            Eligibility is determined by a Decision Tree algorithm that evaluates your Classification Category, Dependents, Per Capita income, and the presence of vulnerable members (OKU/Elderly) to output a Priority Level.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-header">
+                            <div class="faq-header-left">
+                                <i data-lucide="help-circle"></i>
+                                How does the Decision Tree work?
+                            </div>
+                            <i data-lucide="chevron-down" class="faq-icon-toggle"></i>
+                        </div>
+                        <div class="faq-body">
+                            The algorithm first splits households by income (B40, M40, T20). It then branches out based on economic strain (e.g., if a B40 household has per capita income ≤ RM 500). Finally, it checks for vulnerable members. This multi-step process ensures a fair and holistic priority score rather than relying on a single metric.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-header">
+                            <div class="faq-header-left">
+                                <i data-lucide="help-circle"></i>
+                                Can I appeal a classification decision?
+                            </div>
+                            <i data-lucide="chevron-down" class="faq-icon-toggle"></i>
+                        </div>
+                        <div class="faq-body">
+                            Yes. If you believe there is a data error, you may file an appeal through the admin office.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-header">
+                            <div class="faq-header-left">
+                                <i data-lucide="help-circle"></i>
+                                How often are classifications updated?
+                            </div>
+                            <i data-lucide="chevron-down" class="faq-icon-toggle"></i>
+                        </div>
+                        <div class="faq-body">
+                            The automated classification engine sweeps the database weekly to update states based on newly imported or adjusted demographic data.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-header">
+                            <div class="faq-header-left">
+                                <i data-lucide="help-circle"></i>
+                                What data is used for classification?
+                            </div>
+                            <i data-lucide="chevron-down" class="faq-icon-toggle"></i>
+                        </div>
+                        <div class="faq-body">
+                            We securely use resident-provided demographic logs spanning age, dependents, and stated monthly income strictly for village-level assessments.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qa-box">
+                    <h4>Still have questions?</h4>
+                    <p>Contact the village administration office for personalized assistance or to request a detailed review of your household classification.</p>
+                    <button class="btn-icon-text" style="background-color: white;"><i data-lucide="file-text"></i> Request Review</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Footer -->
+        <footer class="dashboard-footer">
+            <p>MyKolong2 Hub &copy; 2026 - Empowering Rural Communities Through Technology</p>
+        </footer>
+    </main>
+
+    <!-- View Resident Modal (Reused from residents.html) -->
+    <link rel="stylesheet" href="css/modals.css">
+    <div class="modal-overlay" id="viewResidentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2>Resident Details</h2>
+                    <p id="viewModalSub">Complete information for [Name]</p>
+                </div>
+                <button class="close-modal-btn bordered-close" id="closeViewResidentModal"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div class="modal-details-grid">
+                <div class="detail-group">
+                    <span class="detail-label">Full Name</span>
+                    <span class="detail-value" id="mdl-name">-</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">IC Number</span>
+                    <span class="detail-value" id="mdl-ic">-</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">Age</span>
+                    <span class="detail-value" id="mdl-age">39 (Estimated)</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">Gender</span>
+                    <span class="detail-value">Not specified</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">Household Income</span>
+                    <span class="detail-value" id="mdl-income">-</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">Dependents</span>
+                    <span class="detail-value" id="mdl-dep">-</span>
+                </div>
+                <div class="detail-group border-fix">
+                    <span class="detail-label">Category</span>
+                    <span class="detail-value" id="mdl-cat">-</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">Phone</span>
+                    <span class="detail-value">Not specified</span>
+                </div>
+                <div class="detail-group full-width">
+                    <span class="detail-label">Address</span>
+                    <span class="detail-value">Village Residence</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { requireAuth, setupLogoutButton, updateUserDisplay } from "./js/auth.js";
+
+        try {
+            lucide.createIcons();
+        } catch (e) {
+            console.warn("Lucide icons failed to load:", e);
+        }
+
+        // Protect this page
+        const user = await requireAuth();
+        updateUserDisplay(user);
+        setupLogoutButton();
+
+        // Tab Switching Logic
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-tab');
+                
+                // Update buttons
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Update contents
+                tabContents.forEach(c => c.classList.remove('active'));
+                document.getElementById(targetId).classList.add('active');
+            });
+        });
+
+        // FAQ Accordion Logic
+        const faqHeaders = document.querySelectorAll('.faq-header');
+        faqHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const item = header.parentElement;
+                
+                // Optional: Close all other accordions first
+                // document.querySelectorAll('.faq-item').forEach(i => {
+                //     if(i !== item) i.classList.remove('active');
+                // });
+
+                item.classList.toggle('active');
+            });
+        });
+
+        // Search Filter Logic
+        const searchInput = document.getElementById('searchInput');
+        const decisionCards = document.querySelectorAll('.decision-card');
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            
+            decisionCards.forEach(card => {
+                const name = card.querySelector('.decision-title-area h4').innerText.toLowerCase();
+                const icRow = card.querySelector('.meta-row').innerText.toLowerCase(); // grabs the IC row
+                
+                if (name.includes(term) || icRow.includes(term)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // View Details Modal Logic
+        const viewModal = document.getElementById('viewResidentModal');
+        const closeViewBtn = document.getElementById('closeViewResidentModal');
+        const viewBtns = document.querySelectorAll('.decision-header .btn-icon-text');
+
+        viewBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Find parent card to scrape data
+                const card = e.currentTarget.closest('.decision-card');
+                
+                // Scrape values
+                const nameStr = card.querySelector('h4').innerText;
+                const badgeHtml = card.querySelector('.approval-badge').outerHTML;
+                const icStr = card.querySelector('.meta-row').innerText.replace('IC: ', '');
+                
+                const gridItems = card.querySelectorAll('.dg-value');
+                const incomeStr = gridItems[0].innerText;
+                const depStr = gridItems[1].innerText;
+
+                // Populate Modal
+                document.getElementById('viewModalSub').innerText = 'Complete information for ' + nameStr;
+                document.getElementById('mdl-name').innerText = nameStr;
+                document.getElementById('mdl-ic').innerText = icStr;
+                document.getElementById('mdl-income').innerText = incomeStr;
+                document.getElementById('mdl-dep').innerText = depStr;
+                document.getElementById('mdl-cat').innerHTML = badgeHtml;
+
+                // Open Modal
+                viewModal.classList.add('active');
+            });
+        });
+
+        closeViewBtn.addEventListener('click', () => viewModal.classList.remove('active'));
+        
+        window.addEventListener('click', (e) => {
+            if (e.target === viewModal) viewModal.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

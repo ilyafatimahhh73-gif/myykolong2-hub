@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyKolong2 Hub - Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+</head>
+
+<body class="dashboard-body">
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo-box-small">
+                <i data-lucide="home" class="logo-icon-small"></i>
+            </div>
+            <div class="nav-brand">
+                <h2>MyKolong2 Hub</h2>
+                <span>Village Management System</span>
+            </div>
+        </div>
+
+        <div class="nav-center">
+            <a href="#" class="nav-link active">
+                <i data-lucide="layout-dashboard"></i>
+                Dashboard
+            </a>
+            <a href="residents.html" class="nav-link">
+                <i data-lucide="users"></i>
+                Residents
+            </a>
+            <a href="welfare.html" class="nav-link">
+                <i data-lucide="heart"></i>
+                Welfare
+            </a>
+            <a href="inventory.html" class="nav-link">
+                <i data-lucide="package"></i>
+                Aid
+            </a>
+            <a href="analytics.html" class="nav-link">
+                <i data-lucide="bar-chart-2"></i>
+                Analytics
+            </a>
+            <a href="admin.html" class="nav-link">
+                <i data-lucide="settings"></i>
+                Admin
+            </a>
+            <a href="transparency.html" class="nav-link">
+                <i data-lucide="shield"></i>
+                Transparency
+            </a>
+        </div>
+
+        <div class="nav-right">
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name">Admin User</span>
+                    <span class="user-role">Admin</span>
+                </div>
+                <div class="user-avatar">
+                    <i data-lucide="user"></i>
+                </div>
+            </div>
+            <a href="signin.html" class="logout-btn">
+                <i data-lucide="log-out"></i>
+                Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1>Welcome back, Admin User</h1>
+            <p>Here's what's happening in your village today.</p>
+        </header>
+
+        <!-- KPI Cards Row -->
+        <section class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span>Total Residents</span>
+                    <div class="kpi-icon-box bg-blue">
+                        <i data-lucide="users" class="text-blue"></i>
+                    </div>
+                </div>
+                <div class="kpi-value" id="kpi-total">0</div>
+                <div class="kpi-subtext" id="kpi-total-sub">Loading...</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span>B40 Households</span>
+                    <div class="kpi-icon-box bg-red">
+                        <i data-lucide="heart" class="text-red"></i>
+                    </div>
+                </div>
+                <div class="kpi-value" id="kpi-b40">0</div>
+                <div class="kpi-subtext" id="kpi-b40-sub">0.0% of total</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span>M40 Households</span>
+                    <div class="kpi-icon-box bg-yellow">
+                        <i data-lucide="dollar-sign" class="text-yellow"></i>
+                    </div>
+                </div>
+                <div class="kpi-value" id="kpi-m40">0</div>
+                <div class="kpi-subtext" id="kpi-m40-sub">0.0% of total</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span>T20 Households</span>
+                    <div class="kpi-icon-box bg-green">
+                        <i data-lucide="trending-up" class="text-green"></i>
+                    </div>
+                </div>
+                <div class="kpi-value" id="kpi-t20">0</div>
+                <div class="kpi-subtext" id="kpi-t20-sub">0.0% of total</div>
+            </div>
+        </section>
+
+        <!-- Two Column Section -->
+        <section class="dashboard-grid-2">
+            <!-- Quick Actions -->
+            <div class="dashboard-card action-card">
+                <div class="card-title-area">
+                    <h3>Quick Actions</h3>
+                    <p>Common tasks and operations</p>
+                </div>
+                <div class="action-list">
+                    <a href="residents.html" class="action-item">
+                        <i data-lucide="user-plus" class="text-green"></i>
+                        <span>Register New Resident</span>
+                    </a>
+                    <a href="welfare.html" class="action-item">
+                        <i data-lucide="heart" class="text-green"></i>
+                        <span>Classify Welfare Status</span>
+                    </a>
+                    <a href="analytics.html" class="action-item">
+                        <i data-lucide="bar-chart-2" class="text-green"></i>
+                        <span>View Analytics</span>
+                    </a>
+                    <a href="#" class="action-item">
+                        <i data-lucide="check-circle" class="text-green"></i>
+                        <span>Check Transparency Portal</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Alerts -->
+            <div class="dashboard-card alerts-card">
+                <div class="card-title-area">
+                    <h3>Recent Alerts</h3>
+                    <p>Important notifications and updates</p>
+                </div>
+                <div class="alerts-list">
+                    <div class="alert-item">
+                        <div class="alert-icon text-orange">
+                            <i data-lucide="alert-triangle"></i>
+                        </div>
+                        <div class="alert-content">
+                            <h4>5 households at risk of poverty</h4>
+                            <p>Income trends show declining patterns</p>
+                            <span class="alert-time">2 hours ago</span>
+                        </div>
+                    </div>
+
+                    <div class="alert-item">
+                        <div class="alert-icon text-blue">
+                            <i data-lucide="clock"></i>
+                        </div>
+                        <div class="alert-content">
+                            <h4>Welfare assessment scheduled</h4>
+                            <p>March 15, 2026 - Community Hall</p>
+                            <span class="alert-time">5 hours ago</span>
+                        </div>
+                    </div>
+
+                    <div class="alert-item">
+                        <div class="alert-icon text-green">
+                            <i data-lucide="check-circle"></i>
+                        </div>
+                        <div class="alert-content">
+                            <h4>Welfare aid distributed</h4>
+                            <p>87 families received assistance</p>
+                            <span class="alert-time">1 day ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- System Health Section -->
+        <section class="dashboard-card full-width-card">
+            <div class="card-title-area">
+                <h3>System Health</h3>
+                <p>Data completeness and system status</p>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-header">
+                    <span>Resident Data Completeness</span>
+                    <span>73%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: 73%;"></div>
+                </div>
+            </div>
+
+            <div class="status-labels">
+                <div class="status-item">
+                    <span class="badge-active">Active</span>
+                    <span>Database</span>
+                </div>
+                <div class="status-item">
+                    <span class="badge-active">Active</span>
+                    <span>Health Module</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Footer -->
+        <footer class="dashboard-footer">
+            <p>MyKolong2 Hub &copy; 2026 - Empowering Rural Communities Through Technology</p>
+        </footer>
+    </main>
+
+    <script type="module" src="./js/dashboard.js"></script>
+</body>
+
+</html>

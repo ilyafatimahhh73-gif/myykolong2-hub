@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyKolong2 Hub - Residents</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- SheetJS for Excel Import/Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <link rel="stylesheet" href="css/modals.css">
+</head>
+
+<body class="dashboard-body">
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo-box-small">
+                <i data-lucide="home" class="logo-icon-small"></i>
+            </div>
+            <div class="nav-brand">
+                <h2>MyKolong2 Hub</h2>
+                <span>Village Management System</span>
+            </div>
+        </div>
+
+        <div class="nav-center">
+            <a href="dashboard.html" class="nav-link">
+                <i data-lucide="layout-dashboard"></i>
+                Dashboard
+            </a>
+            <a href="residents.html" class="nav-link active">
+                <i data-lucide="users"></i>
+                Residents
+            </a>
+            <a href="welfare.html" class="nav-link">
+                <i data-lucide="heart"></i>
+                Welfare
+            </a>
+            <a href="inventory.html" class="nav-link">
+                <i data-lucide="package"></i>
+                Aid
+            </a>
+            <a href="analytics.html" class="nav-link">
+                <i data-lucide="bar-chart-2"></i>
+                Analytics
+            </a>
+            <a href="admin.html" class="nav-link">
+                <i data-lucide="settings"></i>
+                Admin
+            </a>
+            <a href="transparency.html" class="nav-link">
+                <i data-lucide="shield"></i>
+                Transparency
+            </a>
+        </div>
+
+        <div class="nav-right">
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name">Admin User</span>
+                    <span class="user-role">Admin</span>
+                </div>
+                <div class="user-avatar">
+                    <i data-lucide="user"></i>
+                </div>
+            </div>
+            <a href="signin.html" class="logout-btn">
+                <i data-lucide="log-out"></i>
+                Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header flex-header">
+            <div>
+                <h1>Resident Database</h1>
+                <p>Manage demographic and income data for all residents</p>
+            </div>
+        </header>
+
+        <!-- Summary Cards Row -->
+        <section class="kpi-grid summary-grid">
+            <div class="kpi-card mini-card">
+                <div class="mini-kpi-value text-dark" id="kpi-total">0</div>
+                <div class="mini-kpi-label">Total Residents</div>
+            </div>
+            <div class="kpi-card mini-card">
+                <div class="mini-kpi-value text-red" id="kpi-b40">0</div>
+                <div class="mini-kpi-label">B40 Households</div>
+            </div>
+            <div class="kpi-card mini-card">
+                <div class="mini-kpi-value text-yellow" id="kpi-m40">0</div>
+                <div class="mini-kpi-label">M40 Households</div>
+            </div>
+            <div class="kpi-card mini-card">
+                <div class="mini-kpi-value text-green" id="kpi-t20">0</div>
+                <div class="mini-kpi-label">T20 Households</div>
+            </div>
+        </section>
+
+        <!-- Data Table Section -->
+        <section class="dashboard-card full-width-card table-section">
+            <!-- Table Header Area -->
+            <div class="table-header-area">
+                <div class="table-title">
+                    <h3>All Residents</h3>
+                    <p>Complete list of registered residents with demographic data</p>
+                </div>
+                <div class="table-actions">
+                    <button class="btn btn-outline btn-sm" id="exportBtn">
+                        <i data-lucide="upload"></i> Export
+                    </button>
+                    <button class="btn btn-outline btn-sm" id="importBtn">
+                        <i data-lucide="download"></i> Import
+                    </button>
+                    <input type="file" id="importFileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+                    <button class="btn btn-primary btn-sm" id="openAddResidentModal">
+                        <i data-lucide="plus"></i> Add Resident
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Filters -->
+            <div class="table-filters">
+                <div class="search-wrapper">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" placeholder="Search by name or IC number...">
+                </div>
+                <div class="filter-wrapper">
+                    <select>
+                        <option>All Categories</option>
+                        <option>B40</option>
+                        <option>M40</option>
+                        <option>T20</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- The Table -->
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>IC Number</th>
+                            <th>Age</th>
+                            <th>Household Income (RM)</th>
+                            <th>Dependents</th>
+                            <th>Category</th>
+                            <th>Priority</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: #94a3b8; padding: 2rem;">Loading
+                                residents...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="residentsPagination"></div>
+        </section>
+
+        <!-- Dashboard Footer -->
+        <footer class="dashboard-footer">
+            <p>MyKolong2 Hub &copy; 2026 - Empowering Rural Communities Through Technology</p>
+        </footer>
+    </main>
+
+    <!-- Add Resident Modal -->
+    <div class="modal-overlay" id="addResidentModal">
+        <div class="modal-content" style="max-width: 780px;">
+            <div class="modal-header">
+                <div>
+                    <h2>Add New Resident</h2>
+                    <p>Banci Penduduk Kampung — Village Census Form</p>
+                </div>
+                <button class="close-modal-btn" id="closeAddResidentModal"><i data-lucide="x"></i></button>
+            </div>
+
+            <form class="modal-form" style="max-height: 65vh; overflow-y: auto; padding-right: 0.5rem;">
+                <!-- Section 1: Butiran Ketua Isi Rumah -->
+                <div class="census-section-header">
+                    <i data-lucide="user" style="width: 18px; height: 18px;"></i>
+                    <span>Butiran Ketua Isi Rumah</span>
+                </div>
+
+                <div class="form-row two-cols">
+                    <div class="form-group">
+                        <label>Nama <span style="color:#94a3b8; font-weight:400;">(Full Name)</span></label>
+                        <input type="text" id="f-name" placeholder="Enter full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>MyKad <span style="color:#94a3b8; font-weight:400;">(IC Number)</span></label>
+                        <input type="text" id="f-ic" placeholder="YYMMDD-XX-XXXX" required>
+                    </div>
+                </div>
+
+                <div class="form-row two-cols">
+                    <div class="form-group">
+                        <label>Umur <span style="color:#94a3b8; font-weight:400;">(Age)</span></label>
+                        <input type="number" id="f-age" placeholder="Enter age">
+                    </div>
+                    <div class="form-group">
+                        <label>Jantina <span style="color:#94a3b8; font-weight:400;">(Gender)</span></label>
+                        <div class="select-wrapper">
+                            <select id="f-gender">
+                                <option value="" disabled selected>Pilih jantina</option>
+                                <option value="Lelaki">Lelaki (Male)</option>
+                                <option value="Perempuan">Perempuan (Female)</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="select-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row two-cols">
+                    <div class="form-group">
+                        <label>Status Perkahwinan <span style="color:#94a3b8; font-weight:400;">(Marital
+                                Status)</span></label>
+                        <div class="select-wrapper">
+                            <select id="f-marital">
+                                <option value="" disabled selected>Pilih status</option>
+                                <option value="Bujang">Bujang (Single)</option>
+                                <option value="Berkahwin">Berkahwin (Married)</option>
+                                <option value="Bercerai">Bercerai (Divorced)</option>
+                                <option value="Balu/Duda">Balu/Duda (Widowed)</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="select-icon"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Pekerjaan <span style="color:#94a3b8; font-weight:400;">(Occupation)</span></label>
+                        <input type="text" id="f-occupation" placeholder="e.g. Petani, Guru, Peniaga">
+                    </div>
+                </div>
+
+                <div class="form-row two-cols">
+                    <div class="form-group">
+                        <label>Pendapatan Sebulan (RM) <span style="color:#94a3b8; font-weight:400;">(Monthly
+                                Income)</span></label>
+                        <input type="number" id="f-income" placeholder="Enter monthly income">
+                    </div>
+                    <div class="form-group">
+                        <label>No. Telefon <span style="color:#94a3b8; font-weight:400;">(Phone)</span></label>
+                        <input type="tel" id="f-phone" placeholder="01X-XXXXXXX">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Alamat Rumah <span style="color:#94a3b8; font-weight:400;">(Home Address)</span></label>
+                    <input type="text" id="f-address" placeholder="Enter full address">
+                </div>
+
+                <div class="form-row two-cols">
+                    <div class="form-group">
+                        <label>Status OKU <span style="color:#94a3b8; font-weight:400;">(Disabled Person)</span></label>
+                        <div class="select-wrapper">
+                            <select id="f-oku">
+                                <option value="Tidak">Tidak (No)</option>
+                                <option value="Ya">Ya (Yes)</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="select-icon"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Jenis OKU <span style="color:#94a3b8; font-weight:400;">(Type — if
+                                applicable)</span></label>
+                        <input type="text" id="f-oku-type" placeholder="e.g. Fizikal, Penglihatan, Pendengaran">
+                    </div>
+                </div>
+
+                <!-- Section 2: Butiran Isi Rumah (Family Members) -->
+                <div class="census-section-header" style="margin-top: 1.5rem;">
+                    <i data-lucide="users" style="width: 18px; height: 18px;"></i>
+                    <span>Butiran Isi Rumah</span>
+                    <span style="color:#94a3b8; font-weight:400; font-size: 0.8rem; margin-left: 0.5rem;">(Family
+                        Members / Dependents)</span>
+                </div>
+
+                <div id="familyMembersContainer">
+                    <!-- Family member rows will be added here dynamically -->
+                </div>
+
+                <button type="button" id="addFamilyMemberBtn" class="btn btn-outline btn-sm"
+                    style="margin-top: 0.75rem; width: 100%;">
+                    <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Tambah Ahli Keluarga (Add Family
+                    Member)
+                </button>
+
+                <div class="modal-footer" style="margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-outline close-modal-btn-txt"
+                        style="width: auto; padding: 0.75rem 1.5rem;">Batal (Cancel)</button>
+                    <button type="submit" class="btn btn-primary"
+                        style="width: auto; padding: 0.75rem 1.5rem; margin-top: 0;">Simpan (Save)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Resident Modal -->
+    <div class="modal-overlay" id="viewResidentModal">
+        <div class="modal-content" style="max-width: 780px;">
+            <div class="modal-header">
+                <div>
+                    <h2>Resident Details</h2>
+                    <p id="v-sub">Complete information for resident</p>
+                </div>
+                <button class="close-modal-btn bordered-close" id="closeViewResidentModal"><i
+                        data-lucide="x"></i></button>
+            </div>
+
+            <!-- Head of Household Section -->
+            <div class="census-section-header">
+                <i data-lucide="user" style="width: 18px; height: 18px;"></i>
+                <span>Butiran Ketua Isi Rumah</span>
+            </div>
+
+            <div class="modal-details-grid">
+                <div class="detail-group">
+                    <span class="detail-label">Nama</span>
+                    <span class="detail-value" id="v-name">-</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">MyKad</span>
+                    <span class="detail-value" id="v-ic">-</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">Umur</span>
+                    <span class="detail-value" id="v-age">-</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">Jantina</span>
+                    <span class="detail-value" id="v-gender">-</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">Status Perkahwinan</span>
+                    <span class="detail-value" id="v-marital">-</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">Pekerjaan</span>
+                    <span class="detail-value" id="v-occupation">-</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">Pendapatan (RM)</span>
+                    <span class="detail-value" id="v-income">-</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">No. Telefon</span>
+                    <span class="detail-value" id="v-phone">-</span>
+                </div>
+                <div class="detail-group border-fix">
+                    <span class="detail-label">Kategori</span>
+                    <span class="detail-value" id="v-cat">-</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">Priority Level</span>
+                    <span class="detail-value" id="v-priority">-</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">Bil. Tanggungan</span>
+                    <span class="detail-value" id="v-dep">-</span>
+                </div>
+                <div class="detail-group full-width">
+                    <span class="detail-label">Alamat Rumah</span>
+                    <span class="detail-value" id="v-address">-</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">Status OKU</span>
+                    <span class="detail-value" id="v-oku">-</span>
+                </div>
+                <div class="detail-group">
+                    <span class="detail-label">Jenis OKU</span>
+                    <span class="detail-value" id="v-oku-type">-</span>
+                </div>
+            </div>
+
+            <!-- Vulnerability Summary Banner -->
+            <div id="v-vulnerability-banner" style="display:none; margin-top:1rem;"></div>
+
+            <!-- Family Members Section -->
+            <div class="census-section-header" style="margin-top: 1.5rem;">
+                <i data-lucide="users" style="width: 18px; height: 18px;"></i>
+                <span>Butiran Isi Rumah</span>
+            </div>
+            <div id="v-family-members" style="margin-bottom: 1rem;">
+                <p style="color: #94a3b8; font-size: 0.85rem;">No family members recorded.</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { requireAuth, setupLogoutButton, updateUserDisplay } from "./js/auth.js";
+        import { listenToResidents } from "./js/residents.js";
+
+        try {
+            lucide.createIcons();
+        } catch (e) {
+            console.warn("Lucide icons failed to load:", e);
+        }
+
+        // Protect this page
+        const user = await requireAuth();
+        updateUserDisplay(user);
+        setupLogoutButton();
+
+        // Start real-time Firestore listener
+        listenToResidents();
+    </script>
+</body>
+
+</html>

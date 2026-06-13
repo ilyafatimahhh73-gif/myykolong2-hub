@@ -1,0 +1,68 @@
+:root {
+    --bg-color: #f1fbf8;
+    --card-bg: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --primary-color: #10b981;
+    --logo-bg: #0fa968;
+    --input-bg: #f8fafc;
+    --input-border: #e2e8f0;
+    --btn-dark: #0f172a;
+    --border-color: #f1f5f9;
+
+    /* Dashboard specifics */
+    --bg-blue-light: #eff6ff;
+    --text-blue: #3b82f6;
+    --bg-red-light: #fef2f2;
+    --text-red: #ef4444;
+    --bg-yellow-light: #fefce8;
+    --text-yellow: #eab308;
+    --bg-green-light: #edfff5;
+    --text-green: #10b981;
+    --bg-orange-light: #fff7ed;
+    --text-orange: #f97316;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+/* Auth Body background applies typically to default body */
+.auth-body {
+    background-color: var(--bg-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+}
+
+/* Dashboard Body override */
+.dashboard-body {
+    background-color: #f8fafc;
+    display: block;
+    padding: 0;
+    min-height: 100vh;
+}
+
+/* Utility Colors */
+.bg-blue { background-color: var(--bg-blue-light); }
+.text-blue { color: var(--text-blue); }
+.bg-red { background-color: var(--bg-red-light); }
+.text-red { color: var(--text-red); }
+.bg-yellow { background-color: var(--bg-yellow-light); }
+.text-yellow { color: var(--text-yellow); }
+.bg-green { background-color: var(--bg-green-light); }
+.text-green { color: var(--text-green); }
+.text-orange { color: var(--text-orange); }
+.text-dark { color: #0f172a; }
+.font-medium { font-weight: 500; }
+.text-right { text-align: right; }

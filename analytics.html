@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - MyKolong2 Hub</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/analytics.css">
+</head>
+
+<body class="dashboard-body">
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo-box-small">
+                <i data-lucide="home" class="logo-icon-small"></i>
+            </div>
+            <div class="nav-brand">
+                <h2>MyKolong2 Hub</h2>
+                <span>Village Management System</span>
+            </div>
+        </div>
+
+        <div class="nav-center">
+            <a href="dashboard.html" class="nav-link">
+                <i data-lucide="layout-dashboard"></i>
+                Dashboard
+            </a>
+            <a href="residents.html" class="nav-link">
+                <i data-lucide="users"></i>
+                Residents
+            </a>
+            <a href="welfare.html" class="nav-link">
+                <i data-lucide="heart"></i>
+                Welfare
+            </a>
+            <a href="inventory.html" class="nav-link">
+                <i data-lucide="package"></i>
+                Aid
+            </a>
+            <a href="analytics.html" class="nav-link active">
+                <i data-lucide="bar-chart-2"></i>
+                Analytics
+            </a>
+            <a href="admin.html" class="nav-link">
+                <i data-lucide="settings"></i>
+                Admin
+            </a>
+            <a href="transparency.html" class="nav-link">
+                <i data-lucide="shield"></i>
+                Transparency
+            </a>
+        </div>
+
+        <div class="nav-right">
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name">Admin User</span>
+                    <span class="user-role">Admin</span>
+                </div>
+                <div class="user-avatar">
+                    <i data-lucide="user"></i>
+                </div>
+            </div>
+            <a href="signin.html" class="logout-btn">
+                <i data-lucide="log-out"></i>
+                Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1>Analytics Dashboard</h1>
+            <p>Visual insights into poverty trends and community welfare</p>
+        </header>
+
+        <!-- KPI Cards Row -->
+        <section class="kpi-grid">
+            <div class="kpi-card-inline">
+                <div class="kpi-left">
+                    <span class="kpi-big-value text-dark-green" id="a-b40-trend">-8.3%</span>
+                    <span class="kpi-title">B40 Reduction</span>
+                    <span class="kpi-timeframe">Last 6 months</span>
+                </div>
+                <div class="kpi-icon-large bg-light-green">
+                    <i data-lucide="trending-down" class="text-dark-green"></i>
+                </div>
+            </div>
+
+            <div class="kpi-card-inline">
+                <div class="kpi-left">
+                    <span class="kpi-big-value text-dark-orange" id="a-m40-trend">+5.2%</span>
+                    <span class="kpi-title">M40 Growth</span>
+                    <span class="kpi-timeframe">Last 6 months</span>
+                </div>
+                <div class="kpi-icon-large bg-light-orange">
+                    <i data-lucide="trending-up" class="text-dark-orange"></i>
+                </div>
+            </div>
+
+            <div class="kpi-card-inline">
+                <div class="kpi-left">
+                    <span class="kpi-big-value" id="a-avg-income">RM 0</span>
+                    <span class="kpi-title">Avg Income</span>
+                    <span class="kpi-timeframe">Village median</span>
+                </div>
+                <div class="kpi-icon-large bg-light-blue">
+                    <i data-lucide="dollar-sign" class="text-dark-blue"></i>
+                </div>
+            </div>
+
+            <div class="kpi-card-inline">
+                <div class="kpi-left">
+                    <span class="kpi-big-value text-dark-red" id="a-at-risk">0</span>
+                    <span class="kpi-title">At-Risk Families</span>
+                    <span class="kpi-timeframe">Need intervention</span>
+                </div>
+                <div class="kpi-icon-large bg-light-red">
+                    <i data-lucide="alert-triangle" class="text-dark-red"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- Welfare Eligibility Analytics Module -->
+        <section class="dashboard-card full-width-card table-section" style="margin-bottom: 2rem;">
+            <div class="table-header-area">
+                <div class="table-title">
+                    <h3>Welfare Eligibility Analytics</h3>
+                    <p>AI-driven priority analysis based on Per Capita Income and OKU status</p>
+                </div>
+                <div class="table-actions">
+                    <div class="filter-wrapper" style="margin-right: 1rem;">
+                        <select id="welfareTargetCategory">
+                            <option value="Bakul Makanan">Target: Bakul Makanan</option>
+                            <option value="Bantuan Kewangan">Target: Bantuan Kewangan</option>
+                            <option value="Bantuan Bencana">Target: Bantuan Bencana</option>
+                        </select>
+                    </div>
+                    <div class="filter-wrapper" style="margin-right: 1rem;">
+                        <select id="eligibilityFilter">
+                            <option value="All">All Residents</option>
+                            <option value="B40 Only">B40 Only</option>
+                            <option value="OKU Priority">OKU Priority</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="runAnalysisBtn">
+                        <i data-lucide="cpu"></i> Trigger AI Analytics Engine
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">Rank</th>
+                            <th>Resident Name</th>
+                            <th>MyKad</th>
+                            <th>Per Capita Income</th>
+                            <th>Bracket</th>
+                            <th>Priority Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="eligibilityTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #94a3b8; padding: 3rem;">
+                                <i data-lucide="bar-chart" style="width: 48px; height: 48px; opacity: 0.5; margin-bottom: 1rem;"></i><br>
+                                Click "Run Eligibility Analysis" to fetch and calculate priority rankings.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="eligibilityPagination"></div>
+        </section>
+
+        <!-- Charts 2 Columns -->
+        <section class="dashboard-grid-2">
+            <!-- Line Chart Card -->
+            <div class="dashboard-card">
+                <div class="card-title-area">
+                    <h3>Welfare Category Trends</h3>
+                    <p>6-month household distribution changes</p>
+                </div>
+                <div class="chart-container-wrapper">
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Pie Chart Card -->
+            <div class="dashboard-card">
+                <div class="card-title-area">
+                    <h3>Current Distribution</h3>
+                    <p>Household welfare categories breakdown</p>
+                </div>
+                <div class="chart-container-wrapper" style="display: flex; justify-content: center;">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Income Distribution Bar Chart -->
+        <section class="dashboard-card" style="margin-bottom: 2rem;">
+            <div class="insight-banner positive">
+                <div class="insight-text">
+                    <span>Positive Trend:</span> B40 households decreased by 8.3% over the last 6 months, indicating
+                    improved economic conditions.
+                </div>
+            </div>
+            <div class="card-title-area">
+                <h3>Income Distribution</h3>
+                <p>Household income ranges across the village</p>
+            </div>
+            <div class="chart-container-wrapper">
+                <canvas id="barChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Early Warning Panel -->
+        <section class="warning-panel">
+            <div class="warning-header">
+                <i data-lucide="alert-triangle"></i>
+                Early Warning: At-Risk Families
+            </div>
+            <div class="warning-desc">
+                Families showing declining income trends requiring intervention
+            </div>
+
+            <div class="warning-list" id="warningList">
+                <div style="text-align:center; color:#94a3b8; padding:2rem;">Loading at-risk families...</div>
+            </div>
+            <div id="warningPagination"></div>
+
+            <div class="recommended-action">
+                <strong>Recommended Action:</strong> Schedule welfare assessments and provide targeted assistance to
+                prevent these families from falling into deeper poverty.
+            </div>
+        </section>
+
+        <!-- Dashboard Footer -->
+        <footer class="dashboard-footer">
+            <p>MyKolong2 Hub &copy; 2026 - Empowering Rural Communities Through Technology</p>
+        </footer>
+    </main>
+
+    <script type="module" src="./js/analytics-dashboard.js"></script>
+</body>
+
+</html>

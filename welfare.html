@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welfare Classification - MyKolong2 Hub</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <link rel="stylesheet" href="css/welfare.css">
+</head>
+<body class="dashboard-body">
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo-box-small">
+                <i data-lucide="home" class="logo-icon-small"></i>
+            </div>
+            <div class="nav-brand">
+                <h2>MyKolong2 Hub</h2>
+                <span>Village Management System</span>
+            </div>
+        </div>
+
+        <div class="nav-center">
+            <a href="dashboard.html" class="nav-link">
+                <i data-lucide="layout-dashboard"></i>
+                Dashboard
+            </a>
+            <a href="residents.html" class="nav-link">
+                <i data-lucide="users"></i>
+                Residents
+            </a>
+            <a href="welfare.html" class="nav-link active">
+                <i data-lucide="heart"></i>
+                Welfare
+            </a>
+            <a href="inventory.html" class="nav-link">
+                <i data-lucide="package"></i>
+                Aid
+            </a>
+            <a href="analytics.html" class="nav-link">
+                <i data-lucide="bar-chart-2"></i>
+                Analytics
+            </a>
+            <a href="admin.html" class="nav-link">
+                <i data-lucide="settings"></i>
+                Admin
+            </a>
+            <a href="transparency.html" class="nav-link">
+                <i data-lucide="shield"></i>
+                Transparency
+            </a>
+        </div>
+
+        <div class="nav-right">
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name">Admin User</span>
+                    <span class="user-role">Admin</span>
+                </div>
+                <div class="user-avatar">
+                    <i data-lucide="user"></i>
+                </div>
+            </div>
+            <a href="signin.html" class="logout-btn">
+                <i data-lucide="log-out"></i>
+                Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1>Welfare Classification</h1>
+            <p>Automated household categorization and aid prioritization</p>
+        </header>
+
+        <!-- Alert Banner -->
+        <div class="welfare-alert-banner">
+            <i data-lucide="alert-circle" class="alert-circle-icon"></i>
+            <div class="welfare-alert-content">
+                <h4>Action Required</h4>
+                <p>2 households are at high risk of poverty and require immediate attention.</p>
+            </div>
+        </div>
+
+        <!-- Welfare KPIs 5 Columns -->
+        <section class="welfare-kpi-grid">
+            <div class="dashboard-card mini-card">
+                <div class="kpi-value text-red" id="w-b40">0</div>
+                <div class="mini-kpi-label text-dark" style="font-weight: 500; margin-bottom: 0.15rem;">B40 Households</div>
+                <div class="mini-kpi-label" id="w-b40-sub">0.0% of total</div>
+            </div>
+            <div class="dashboard-card mini-card">
+                <div class="kpi-value text-yellow" id="w-m40">0</div>
+                <div class="mini-kpi-label text-dark" style="font-weight: 500; margin-bottom: 0.15rem;">M40 Households</div>
+                <div class="mini-kpi-label" id="w-m40-sub">0.0% of total</div>
+            </div>
+            <div class="dashboard-card mini-card">
+                <div class="kpi-value text-green" id="w-t20">0</div>
+                <div class="mini-kpi-label text-dark" style="font-weight: 500; margin-bottom: 0.15rem;">T20 Households</div>
+                <div class="mini-kpi-label" id="w-t20-sub">0.0% of total</div>
+            </div>
+            <div class="dashboard-card mini-card">
+                <div class="kpi-value text-red" id="w-high-risk">0</div>
+                <div class="mini-kpi-label text-dark" style="font-weight: 500; margin-bottom: 0.15rem;">High Risk</div>
+                <div class="mini-kpi-label">Needs intervention</div>
+            </div>
+            <div class="dashboard-card mini-card">
+                <div class="kpi-value text-green" id="w-eligible">0</div>
+                <div class="mini-kpi-label text-dark" style="font-weight: 500; margin-bottom: 0.15rem;">Aid Eligible</div>
+                <div class="mini-kpi-label">Priority list</div>
+            </div>
+        </section>
+
+        <!-- Classification Criteria -->
+        <div class="dashboard-card" style="margin-bottom: 2rem;">
+            <div class="card-title-area">
+                <h3>Classification Criteria</h3>
+                <p>Income thresholds for automatic household categorization</p>
+            </div>
+            <div class="criteria-blocks-wrapper">
+                <div class="criteria-block b40">
+                    <div class="criteria-content">
+                        <h4>B40</h4>
+                        <p>Bottom 40% - Monthly household income below RM 4,850</p>
+                    </div>
+                    <div class="criteria-badge" id="badge-b40-count">0 households</div>
+                </div>
+                <div class="criteria-block m40">
+                    <div class="criteria-content">
+                        <h4>M40</h4>
+                        <p>Middle 40% - Monthly household income between RM 4,851 and RM 10,970</p>
+                    </div>
+                    <div class="criteria-badge" id="badge-m40-count">0 households</div>
+                </div>
+                <div class="criteria-block t20">
+                    <div class="criteria-content">
+                        <h4>T20</h4>
+                        <p>Top 20% - Monthly household income above RM 10,971</p>
+                    </div>
+                    <div class="criteria-badge" id="badge-t20-count">0 households</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Household Classifications Table -->
+        <div class="dashboard-card" style="margin-bottom: 2rem;">
+            <div class="card-title-area" style="margin-bottom: 1rem;">
+                <h3>Household Classifications</h3>
+                <p>Complete list with welfare categories and priority scores</p>
+            </div>
+            
+            <div class="tabs-container">
+                <button class="filter-tab active" data-filter="all">All Households</button>
+                <button class="filter-tab" data-filter="b40">B40 Only</button>
+                <button class="filter-tab" data-filter="m40">M40 Only</button>
+                <button class="filter-tab" data-filter="t20">T20 Only</button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Head of Household</th>
+                            <th>Category</th>
+                            <th>Income (RM)</th>
+                            <th>Per Capita</th>
+                            <th>Dependents</th>
+                            <th>Risk Level</th>
+                            <th>Trend</th>
+                            <th>Priority Score</th>
+                            <th>Aid Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="welfareTableBody">
+                        <tr><td colspan="9" style="text-align: center; color: #94a3b8; padding: 2rem;">Loading data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="welfarePagination"></div>
+        </div>
+
+        <!-- Priority List Section -->
+        <div class="dashboard-card" style="margin-bottom: 2rem;">
+            <div class="card-title-area" style="margin-bottom: 1.5rem;">
+                <h3>Aid Distribution Priority List</h3>
+                <p>Households ranked by priority score for welfare assistance</p>
+            </div>
+            
+            <div class="priority-list-wrapper" id="priorityListWrapper">
+                <div style="text-align: center; color: #94a3b8; padding: 2rem;">Loading priority list...</div>
+            </div>
+        </div>
+
+        <!-- Dashboard Footer -->
+        <footer class="dashboard-footer">
+            <p>MyKolong2 Hub &copy; 2026 - Empowering Rural Communities Through Technology</p>
+        </footer>
+    </main>
+
+    <script type="module" src="./js/welfare.js"></script>
+</body>
+</html>

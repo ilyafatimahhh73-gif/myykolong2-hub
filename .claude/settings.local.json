@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh auth *)",
+      "PowerShell(gh auth status 2>&1)",
+      "Bash(python3 -c ' *)",
+      "Bash(find \"C:\\\\Users\\\\User\\\\Desktop\\\\UTHM\\\\MYKOLONG 2 HUB\" -iname \"*.xlsx\" -o -iname \"*.xls*\" -o -iname \"*template*\" -o -iname \"*ketua*\" 2>/dev/null; echo \"---\"; find \"C:\\\\Users\\\\User\" -maxdepth 4 -iname \"*kolong*\" 2>/dev/null)",
+      "Bash(python -c ' *)",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  }
+}
