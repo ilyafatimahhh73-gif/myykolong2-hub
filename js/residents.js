@@ -28,6 +28,47 @@ function formatNumber(num) {
     return Number(num).toLocaleString();
 }
 
+/** Parse a Malaysian IC (MyKad) number and return its date of birth, or null if invalid */
+function getDobFromIC(ic) {
+    const digits = String(ic || '').replace(/[^0-9]/g, '');
+    if (digits.length < 6) return null;
+
+    const yy = parseInt(digits.substring(0, 2), 10);
+    const mm = parseInt(digits.substring(2, 4), 10);
+    const dd = parseInt(digits.substring(4, 6), 10);
+    if (mm < 1 || mm > 12 || dd < 1 || dd > 31) return null;
+
+    // Expand the 2-digit year, assuming a birth date can't be in the future
+    const currentYear = new Date().getFullYear();
+    const baseCentury = Math.floor(currentYear / 100) * 100;
+    const fullYear = (yy <= currentYear % 100) ? baseCentury + yy : baseCentury - 100 + yy;
+
+    const dob = new Date(fullYear, mm - 1, dd);
+    if (dob.getMonth() !== mm - 1 || dob.getDate() !== dd) return null; // e.g. Feb 30
+    return dob;
+}
+
+/** Calculate age in completed years from a date of birth */
+function calculateAge(dob) {
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) age--;
+    return age;
+}
+
+/** Derive age from a MyKad IC number, or null if the IC isn't a valid Malaysian format */
+function getAgeFromIC(ic) {
+    const dob = getDobFromIC(ic);
+    return dob ? calculateAge(dob) : null;
+}
+
+/** Resolve a person's current age, preferring the IC-derived value over a stored fallback */
+function resolveAge(ic, fallbackAge) {
+    const icAge = getAgeFromIC(ic);
+    return icAge !== null ? icAge : (fallbackAge || 0);
+}
+
 /** Calculate total household income (head + all family members) */
 function getHouseholdIncome(resident) {
     let total = parseFloat(resident.income) || 0;
@@ -47,11 +88,11 @@ export function evaluateEligibility(resident) {
     const perCapita = dependents > 0 ? householdIncome / (dependents + 1) : householdIncome;
 
     let hasOku = resident.oku === 'Ya';
-    let hasElderly = resident.age >= 60;
+    let hasElderly = resolveAge(resident.ic, resident.age) >= 60;
     if (resident.familyMembers) {
         resident.familyMembers.forEach(m => {
             if (m.oku === 'Ya') hasOku = true;
-            if (m.age >= 60) hasElderly = true;
+            if (resolveAge(m.ic, m.age) >= 60) hasElderly = true;
         });
     }
 
@@ -115,6 +156,12 @@ const fPhone = document.getElementById('f-phone');
 const fOku = document.getElementById('f-oku');
 const fOkuType = document.getElementById('f-oku-type');
 
+// Auto-fill age from IC number as the head's IC is typed
+if (fIc) fIc.addEventListener('input', () => {
+    const age = getAgeFromIC(fIc.value);
+    if (age !== null) fAge.value = age;
+});
+
 // Family members container
 const familyContainer = document.getElementById('familyMembersContainer');
 const addFamilyBtn = document.getElementById('addFamilyMemberBtn');
@@ -167,7 +214,7 @@ function flattenResidents(residents) {
         flat.push({
             name: r.name,
             ic: r.ic,
-            age: r.age,
+            age: resolveAge(r.ic, r.age),
             gender: r.gender,
             oku: r.oku,
             okuType: r.okuType,
@@ -182,7 +229,7 @@ function flattenResidents(residents) {
             flat.push({
                 name: m.name,
                 ic: m.ic,
-                age: m.age,
+                age: resolveAge(m.ic, m.age),
                 gender: m.gender,
                 oku: m.oku,
                 okuType: m.okuType,
@@ -445,6 +492,14 @@ function addFamilyMemberCard(data = {}) {
     `;
     familyContainer.appendChild(card);
     lucide.createIcons();
+
+    // Auto-fill age from IC number as this member's IC is typed
+    const fmIc = card.querySelector('.fm-ic');
+    const fmAge = card.querySelector('.fm-age');
+    fmIc.addEventListener('input', () => {
+        const age = getAgeFromIC(fmIc.value);
+        if (age !== null) fmAge.value = age;
+    });
 }
 
 /** Collect all family member data from the form cards */
@@ -529,7 +584,7 @@ function openViewModal(r) {
     vSub.textContent = 'Maklumat lengkap untuk ' + r.name;
     vName.textContent = r.name;
     vIc.textContent = r.ic;
-    vAge.textContent = r.age || '-';
+    vAge.textContent = resolveAge(r.ic, r.age) || '-';
     vGender.textContent = normalizeGender(r.gender) || 'Tidak dinyatakan';
     vMarital.textContent = r.maritalStatus || 'Tidak dinyatakan';
     vOccupation.textContent = r.occupation || 'Tidak dinyatakan';
@@ -557,15 +612,16 @@ function openViewModal(r) {
     vOkuType.textContent = r.okuType || '-';
 
     // Calculate vulnerability flags
+    const headAge = resolveAge(r.ic, r.age);
     let okuCount = (r.oku === 'Ya') ? 1 : 0;
-    let elderlyCount = (r.age >= 60) ? 1 : 0;
-    let elderlyNames = (r.age >= 60) ? [r.name] : [];
+    let elderlyCount = (headAge >= 60) ? 1 : 0;
+    let elderlyNames = (headAge >= 60) ? [r.name] : [];
     let okuNames = (r.oku === 'Ya') ? [r.name] : [];
 
     if (r.familyMembers && r.familyMembers.length > 0) {
         r.familyMembers.forEach(m => {
             if (m.oku === 'Ya') { okuCount++; okuNames.push(m.name); }
-            if (m.age >= 60) { elderlyCount++; elderlyNames.push(m.name); }
+            if (resolveAge(m.ic, m.age) >= 60) { elderlyCount++; elderlyNames.push(m.name); }
         });
     }
 
@@ -598,13 +654,14 @@ function openViewModal(r) {
                 <th>Jantina</th><th>Hubungan</th><th>Pekerjaan</th><th>OKU</th>
             </tr></thead><tbody>`;
         r.familyMembers.forEach((m, i) => {
-            const isElderly = m.age >= 60;
+            const memberAge = resolveAge(m.ic, m.age);
+            const isElderly = memberAge >= 60;
             const isOku = m.oku === 'Ya';
             const rowStyle = (isElderly || isOku) ? 'background: #fffbeb;' : '';
             tableHTML += `<tr style="${rowStyle}">
                 <td>${i + 1}</td>
                 <td style="font-weight:500;">${m.name}${isElderly ? ' 👴' : ''}${isOku ? ' ♿' : ''}</td>
-                <td>${m.age || '-'}</td>
+                <td>${memberAge || '-'}</td>
                 <td>${m.gender || '-'}</td>
                 <td>${m.relationship || '-'}</td>
                 <td>${m.occupation || '-'}</td>
@@ -1081,7 +1138,7 @@ exportBtn.addEventListener('click', () => {
     const exportData = allResidents.map(r => ({
         'Name': r.name,
         'IC Number': r.ic,
-        'Age': r.age,
+        'Age': resolveAge(r.ic, r.age),
         'Gender': r.gender ? r.gender.charAt(0).toUpperCase() + r.gender.slice(1) : '',
         'Income (RM)': r.income,
         'Dependents': r.dependents,
