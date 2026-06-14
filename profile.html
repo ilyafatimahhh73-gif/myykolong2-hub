@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resident Portal - MyKolong2 Hub</title>
+    <title>Profile & Demographics - MyKolong2 Hub</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,11 +30,11 @@
         </div>
 
         <div class="nav-center">
-            <a href="resident-portal.html" class="nav-link active">
+            <a href="resident-portal.html" class="nav-link">
                 <i data-lucide="home"></i>
                 Home
             </a>
-            <a href="profile.html" class="nav-link">
+            <a href="profile.html" class="nav-link active">
                 <i data-lucide="user-circle"></i>
                 Profile
             </a>
@@ -68,47 +68,22 @@
     <!-- Main Content Area -->
     <main class="dashboard-container">
         <header class="dashboard-header">
-            <h1>Welcome, <span id="residentName">Resident</span></h1>
-            <p>Your personal MyKolong2 Hub portal.</p>
+            <h1>Profile & Demographics</h1>
+            <p>Manage your personal information and household details.</p>
         </header>
 
-        <section class="kpi-grid">
-            <a href="profile.html" class="kpi-card" style="text-decoration: none; color: inherit;">
-                <div class="kpi-header">
-                    <span>Profile &amp; Demographics</span>
-                    <div class="kpi-icon-box bg-blue">
-                        <i data-lucide="user-circle" class="text-blue"></i>
-                    </div>
+        <div class="kpi-card" style="max-width: 480px;">
+            <div class="kpi-header">
+                <span>Profile & Demographics</span>
+                <div class="kpi-icon-box bg-blue">
+                    <i data-lucide="construction" class="text-blue"></i>
                 </div>
-                <p style="color: var(--text-secondary); font-size: 0.9rem;">
-                    View and update your personal information and household details.
-                </p>
-            </a>
-
-            <a href="notifications.html" class="kpi-card" style="text-decoration: none; color: inherit;">
-                <div class="kpi-header">
-                    <span>Notifications</span>
-                    <div class="kpi-icon-box bg-yellow">
-                        <i data-lucide="bell" class="text-yellow"></i>
-                    </div>
-                </div>
-                <p style="color: var(--text-secondary); font-size: 0.9rem;">
-                    Check your welfare aid eligibility status and collection schedules.
-                </p>
-            </a>
-
-            <a href="transparency.html" class="kpi-card" style="text-decoration: none; color: inherit;">
-                <div class="kpi-header">
-                    <span>Transparency</span>
-                    <div class="kpi-icon-box bg-green">
-                        <i data-lucide="shield" class="text-green"></i>
-                    </div>
-                </div>
-                <p style="color: var(--text-secondary); font-size: 0.9rem;">
-                    See the reasoning behind welfare aid decisions for your household.
-                </p>
-            </a>
-        </section>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                This page is under construction. Soon you'll be able to view and update your
+                personal profile and household demographic information here.
+            </p>
+        </div>
     </main>
 
     <script type="module">
@@ -125,11 +100,6 @@
         updateUserDisplay(user);
         setupLogoutButton();
         applyNavVisibility(role);
-
-        const residentNameEl = document.getElementById('residentName');
-        if (residentNameEl) {
-            residentNameEl.textContent = user.displayName || user.email;
-        }
     </script>
 </body>
 

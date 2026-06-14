@@ -1,7 +1,8 @@
-import { collection, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
-import { requireAuth, setupLogoutButton, updateUserDisplay } from "./auth.js";
-import { applyNavVisibility } from "./authGuard.js";
+import { setupLogoutButton, updateUserDisplay } from "./auth.js";
+import { protectPage, applyNavVisibility } from "./authGuard.js";
+import { ADMIN_ROLES } from "./login.js";
 
 function classifyIncome(income) {
     if (income <= 4850) return 'B40';
@@ -26,13 +27,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.warn("Lucide icons failed to load:", e);
     }
 
-    const user = await requireAuth();
+    // Staff only - Residents are redirected to signin.html
+    const { user, role } = await protectPage(ADMIN_ROLES);
     updateUserDisplay(user);
     setupLogoutButton();
-
-    // Hide nav tabs the user's role isn't allowed to open
-    const userSnap = await getDoc(doc(db, "users", user.uid));
-    const role = userSnap.exists() ? userSnap.data().role : null;
     applyNavVisibility(role);
 
     // DOM Elements

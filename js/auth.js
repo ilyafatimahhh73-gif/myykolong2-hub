@@ -2,7 +2,9 @@
 // Shared across all protected pages
 
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { auth } from "./firebase-config.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { auth, db } from "./firebase-config.js";
+import { ADMIN_ROLES } from "./login.js";
 
 /**
  * Redirect to signin.html if user is NOT logged in.
@@ -21,14 +23,28 @@ export function requireAuth() {
 }
 
 /**
- * Redirect to dashboard.html if user IS already logged in.
+ * Redirect to the role-appropriate dashboard if user IS already logged in.
  * Call this on auth pages (signin, signup) so logged-in users skip them.
  */
 export function redirectIfLoggedIn() {
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
+    // Only react to the auth state that's already active when the page loads.
+    // Without unsubscribing, this listener would also fire (and hijack
+    // navigation) when createUserWithEmailAndPassword signs the user in
+    // during signup, racing the signup handler's setDoc() call.
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        unsubscribe();
+
+        if (!user) return;
+
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        const role = userSnap.exists() ? userSnap.data().role : null;
+
+        if (ADMIN_ROLES.includes(role)) {
             window.location.href = "dashboard.html";
+        } else if (role === "Resident") {
+            window.location.href = "resident-portal.html";
         }
+        // Unknown/missing role: stay put so the user isn't bounced into a loop
     });
 }
 

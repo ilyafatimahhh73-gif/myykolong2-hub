@@ -14,17 +14,23 @@
 //   </script>
 //
 // Per-page allowed roles for this app:
+//   dashboard.html       -> protectPage(ADMIN_ROLES)  [Ketua Kampung, Setiausaha, Bendahari]
 //   residents.html       -> protectPage(["Setiausaha"])
+//   welfare.html          -> protectPage(["Ketua Kampung", "Setiausaha"])
 //   inventory.html       -> protectPage(["Setiausaha", "Bendahari"])
 //   analytics.html       -> protectPage(["Ketua Kampung", "Setiausaha"])
+//   admin.html            -> protectPage(ADMIN_ROLES)
 //   approval.html        -> protectPage(["Ketua Kampung"])
 //   register_staff.html  -> protectPage(["Ketua Kampung"])
+//   transparency.html     -> requireAuth() — open to all roles incl. Resident
 //   resident-portal.html -> protectPage(["Resident"])
+//   profile.html          -> protectPage(["Resident"])
+//   notifications.html    -> protectPage(["Resident"])
 //
 // ---- Nav filtering ---------------------------------------------------------
-// On pages with the shared staff navbar (dashboard/residents/welfare/
-// inventory/analytics/admin/transparency), call applyNavVisibility(role)
-// after resolving the role to hide nav-center links the role can't open:
+// Every page above shares the same navbar markup (same links, same order,
+// only the "active" class differs). After resolving the role, call
+// applyNavVisibility(role) to remove nav-center links that role can't open:
 //
 //   applyNavVisibility(role);
 // ---------------------------------------------------------------------------
@@ -36,10 +42,10 @@ import { auth, db } from "./firebase-config.js";
 // Pages each role is allowed to see in the main navbar (.nav-center).
 // Pages not listed here for a role are removed from the nav on that page.
 const ROLE_NAV_PAGES = {
-    "Ketua Kampung": ["dashboard.html", "welfare.html", "analytics.html", "admin.html", "transparency.html"],
+    "Ketua Kampung": ["dashboard.html", "welfare.html", "analytics.html", "approval.html", "admin.html", "transparency.html"],
     "Setiausaha": ["dashboard.html", "residents.html", "welfare.html", "inventory.html", "analytics.html", "admin.html", "transparency.html"],
     "Bendahari": ["dashboard.html", "inventory.html", "admin.html", "transparency.html"],
-    "Resident": []
+    "Resident": ["resident-portal.html", "profile.html", "notifications.html", "transparency.html"]
 };
 
 /**
@@ -81,11 +87,9 @@ export function protectPage(allowedRoles) {
  */
 export function applyNavVisibility(role) {
     const allowedPages = ROLE_NAV_PAGES[role] || [];
-    const currentPage = window.location.pathname.split("/").pop() || "dashboard.html";
 
     document.querySelectorAll(".nav-center .nav-link").forEach((link) => {
-        let href = link.getAttribute("href");
-        if (href === "#") href = currentPage; // active link on its own page
+        const href = link.getAttribute("href");
         if (!allowedPages.includes(href)) {
             link.remove();
         }

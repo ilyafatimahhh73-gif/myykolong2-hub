@@ -50,6 +50,10 @@
                 <i data-lucide="bar-chart-2"></i>
                 Analytics
             </a>
+            <a href="approval.html" class="nav-link">
+                <i data-lucide="check-circle"></i>
+                Approvals
+            </a>
             <a href="admin.html" class="nav-link">
                 <i data-lucide="settings"></i>
                 Admin
@@ -133,7 +137,7 @@
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
         import { firebaseConfig } from "./js/firebase-config.js";
         import { setupLogoutButton, updateUserDisplay } from "./js/auth.js";
-        import { protectPage } from "./js/authGuard.js";
+        import { protectPage, applyNavVisibility } from "./js/authGuard.js";
 
         if (typeof lucide !== 'undefined') {
             lucide.createIcons();
@@ -142,9 +146,10 @@
         }
 
         // Protect this page - Ketua Kampung only
-        const { user } = await protectPage(["Ketua Kampung"]);
+        const { user, role } = await protectPage(["Ketua Kampung"]);
         updateUserDisplay(user);
         setupLogoutButton();
+        applyNavVisibility(role);
 
         const form = document.getElementById('staffForm');
         const submitBtn = form.querySelector('button[type="submit"]');
