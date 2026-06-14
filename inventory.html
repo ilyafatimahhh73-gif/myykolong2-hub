@@ -209,8 +209,12 @@
     <!-- Firebase & Main Script -->
     <script type="module">
         import { setupLogoutButton, updateUserDisplay } from "./js/auth.js";
-        import { protectPage, applyNavVisibility } from "./js/authGuard.js";
+        import { protectPage, applyNavVisibility, applyCachedNavVisibility } from "./js/authGuard.js";
         import { initInventory } from "./js/inventory.js";
+
+        // Apply the last-known role's nav filter immediately, before protectPage()
+        // resolves, so the navbar is already correct on first paint.
+        applyCachedNavVisibility();
 
         // Initialize Lucide icons
         try {

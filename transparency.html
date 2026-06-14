@@ -473,7 +473,11 @@
         import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
         import { db } from "./js/firebase-config.js";
         import { requireAuth, setupLogoutButton, updateUserDisplay } from "./js/auth.js";
-        import { applyNavVisibility } from "./js/authGuard.js";
+        import { applyNavVisibility, applyCachedNavVisibility, cacheNavRole } from "./js/authGuard.js";
+
+        // Apply the last-known role's nav filter immediately, before the
+        // role lookup below resolves, so the navbar is already correct on first paint.
+        applyCachedNavVisibility();
 
         try {
             lucide.createIcons();
@@ -489,6 +493,7 @@
         // Hide nav tabs the user's role isn't allowed to open
         const userSnap = await getDoc(doc(db, "users", user.uid));
         const role = userSnap.exists() ? userSnap.data().role : null;
+        cacheNavRole(role);
         applyNavVisibility(role);
 
         // Tab Switching Logic

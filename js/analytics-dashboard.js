@@ -1,9 +1,13 @@
 import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
 import { setupLogoutButton, updateUserDisplay } from "./auth.js";
-import { protectPage, applyNavVisibility } from "./authGuard.js";
+import { protectPage, applyNavVisibility, applyCachedNavVisibility } from "./authGuard.js";
 import { runEligibilityAnalysis } from "./eligibility.js";
 import { createPaginator } from "./pagination.js";
+
+// Apply the last-known role's nav filter immediately, before protectPage()
+// resolves, so the navbar is already correct on first paint.
+applyCachedNavVisibility();
 
 function getHouseholdIncome(resident) {
     let total = parseFloat(resident.income) || 0;
@@ -31,6 +35,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateUserDisplay(user);
     setupLogoutButton();
     applyNavVisibility(role);
+
+    // Welfare Eligibility Analytics is Setiausaha's responsibility - hide it for Ketua Kampung
+    if (role !== "Setiausaha") {
+        const eligibilityPanel = document.getElementById('welfare-eligibility-panel');
+        if (eligibilityPanel) eligibilityPanel.remove();
+    }
 
     // Chart.js Default styling overriding
     if (typeof Chart !== 'undefined') {

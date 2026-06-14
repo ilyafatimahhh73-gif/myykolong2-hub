@@ -5,6 +5,7 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { auth, db } from "./firebase-config.js";
 import { ADMIN_ROLES } from "./login.js";
+import { clearCachedRole } from "./authGuard.js";
 
 /**
  * Redirect to signin.html if user is NOT logged in.
@@ -54,6 +55,7 @@ export function redirectIfLoggedIn() {
 export async function logoutUser() {
     try {
         await signOut(auth);
+        clearCachedRole();
         window.location.href = "signin.html";
     } catch (error) {
         console.error("Logout error:", error);

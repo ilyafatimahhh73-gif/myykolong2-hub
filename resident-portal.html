@@ -112,8 +112,12 @@
     </main>
 
     <script type="module">
-        import { protectPage, applyNavVisibility } from "./js/authGuard.js";
+        import { protectPage, applyNavVisibility, applyCachedNavVisibility } from "./js/authGuard.js";
         import { updateUserDisplay, setupLogoutButton } from "./js/auth.js";
+
+        // Apply the last-known role's nav filter immediately, before protectPage()
+        // resolves, so the navbar is already correct on first paint.
+        applyCachedNavVisibility();
 
         if (typeof lucide !== 'undefined') {
             lucide.createIcons();

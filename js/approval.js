@@ -1,8 +1,12 @@
 import { collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
 import { setupLogoutButton, updateUserDisplay } from "./auth.js";
-import { protectPage, applyNavVisibility } from "./authGuard.js";
+import { protectPage, applyNavVisibility, applyCachedNavVisibility } from "./authGuard.js";
 import { createPaginator } from "./pagination.js";
+
+// Apply the last-known role's nav filter immediately, before protectPage()
+// resolves, so the navbar is already correct on first paint.
+applyCachedNavVisibility();
 
 let currentDraftId = null;
 
