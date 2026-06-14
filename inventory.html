@@ -197,7 +197,8 @@
 
     <!-- Firebase & Main Script -->
     <script type="module">
-        import { requireAuth, setupLogoutButton, updateUserDisplay } from "./js/auth.js";
+        import { setupLogoutButton, updateUserDisplay } from "./js/auth.js";
+        import { protectPage } from "./js/authGuard.js";
         import { initInventory } from "./js/inventory.js";
 
         // Initialize Lucide icons
@@ -207,8 +208,8 @@
             console.warn("Lucide icons failed to load:", e);
         }
 
-        // Protect page
-        const user = await requireAuth();
+        // Protect page (Setiausaha + Bendahari)
+        const { user } = await protectPage(["Setiausaha", "Bendahari"]);
         updateUserDisplay(user);
         setupLogoutButton();
 

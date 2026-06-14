@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resident Portal - MyKolong2 Hub</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+</head>
+
+<body class="dashboard-body">
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo-box-small">
+                <i data-lucide="home" class="logo-icon-small"></i>
+            </div>
+            <div class="nav-brand">
+                <h2>MyKolong2 Hub</h2>
+                <span>Resident Portal</span>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name">Resident</span>
+                    <span class="user-role">Resident</span>
+                </div>
+                <div class="user-avatar">
+                    <i data-lucide="user"></i>
+                </div>
+            </div>
+            <a href="signin.html" class="logout-btn">
+                <i data-lucide="log-out"></i>
+                Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>Welcome, <span id="residentName">Resident</span></h1>
+            <p>Your personal MyKolong2 Hub portal.</p>
+        </header>
+
+        <div class="kpi-card" style="max-width: 480px;">
+            <div class="kpi-header">
+                <span>Resident Portal</span>
+                <div class="kpi-icon-box bg-blue">
+                    <i data-lucide="construction" class="text-blue"></i>
+                </div>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                This portal is under construction. Soon you'll be able to view your household's
+                welfare aid status, eligibility, and announcements here.
+            </p>
+        </div>
+    </main>
+
+    <script type="module">
+        import { protectPage } from "./js/authGuard.js";
+        import { updateUserDisplay, setupLogoutButton } from "./js/auth.js";
+
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        } else {
+            console.warn("Lucide icons failed to load. Proceeding without icons.");
+        }
+
+        const { user } = await protectPage(["Resident"]);
+        updateUserDisplay(user);
+        setupLogoutButton();
+
+        const residentNameEl = document.getElementById('residentName');
+        if (residentNameEl) {
+            residentNameEl.textContent = user.displayName || user.email;
+        }
+    </script>
+</body>
+
+</html>

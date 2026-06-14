@@ -202,11 +202,12 @@
                     email: email,
                     accountType: accountType,
                     icNumber: icNumber,
+                    role: "Resident",
                     createdAt: new Date().toISOString()
                 });
 
-                // Redirect to dashboard
-                window.location.href = "dashboard.html";
+                // New signups are Residents - send them to their portal
+                window.location.href = "resident-portal.html";
 
             } catch (error) {
                 submitBtn.disabled = false;

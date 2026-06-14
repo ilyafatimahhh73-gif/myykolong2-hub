@@ -1,6 +1,7 @@
 import { collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
-import { requireAuth, setupLogoutButton } from "./auth.js";
+import { setupLogoutButton, updateUserDisplay } from "./auth.js";
+import { protectPage } from "./authGuard.js";
 import { createPaginator } from "./pagination.js";
 
 let currentDraftId = null;
@@ -22,7 +23,8 @@ const recipientsPaginator = createPaginator({
 document.addEventListener("DOMContentLoaded", async () => {
     try {
         if (typeof lucide !== 'undefined') lucide.createIcons();
-        await requireAuth();
+        const { user } = await protectPage(["Ketua Kampung"]);
+        updateUserDisplay(user);
         setupLogoutButton();
 
         // Bind button events

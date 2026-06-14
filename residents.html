@@ -412,7 +412,8 @@
     </div>
 
     <script type="module">
-        import { requireAuth, setupLogoutButton, updateUserDisplay } from "./js/auth.js";
+        import { setupLogoutButton, updateUserDisplay } from "./js/auth.js";
+        import { protectPage } from "./js/authGuard.js";
         import { listenToResidents } from "./js/residents.js";
 
         try {
@@ -421,8 +422,8 @@
             console.warn("Lucide icons failed to load:", e);
         }
 
-        // Protect this page
-        const user = await requireAuth();
+        // Protect this page (Setiausaha only)
+        const { user } = await protectPage(["Setiausaha"]);
         updateUserDisplay(user);
         setupLogoutButton();
 

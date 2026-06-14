@@ -1,6 +1,7 @@
 import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
-import { requireAuth, setupLogoutButton, updateUserDisplay } from "./auth.js";
+import { setupLogoutButton, updateUserDisplay } from "./auth.js";
+import { protectPage } from "./authGuard.js";
 import { runEligibilityAnalysis } from "./eligibility.js";
 import { createPaginator } from "./pagination.js";
 
@@ -26,7 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         runBtn.addEventListener('click', runEligibilityAnalysis);
     }
 
-    const user = await requireAuth();
+    const { user } = await protectPage(["Ketua Kampung", "Setiausaha"]);
     updateUserDisplay(user);
     setupLogoutButton();
 

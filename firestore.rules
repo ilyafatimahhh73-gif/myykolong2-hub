@@ -1,0 +1,79 @@
+rules_version = '2';
+
+// Firestore Security Rules — MyKolong2 Hub
+// Deploy with: firebase deploy --only firestore:rules
+//
+// ⚠️ BEFORE DEPLOYING: every existing account's users/{uid} document must
+// have a "role" field set (one of "Ketua Kampung", "Setiausaha",
+// "Bendahari", "Resident"). Accounts created before this rollout only have
+// { fullName, email, accountType, icNumber, createdAt } — no "role" yet.
+// Add the field manually in the Firebase console for existing staff
+// accounts, otherwise getUserRole() returns null and they will be locked
+// out of every collection below.
+//
+// Any collection NOT matched below has no "allow" rule and is therefore
+// denied for all reads/writes by default (Firestore's default-deny
+// behaviour).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- Helpers ------------------------------------------------------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Looks up the caller's role from their own users/{uid} document.
+    // Costs one extra document read per rule evaluation that calls it.
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    // ---- users collection -----------------------------------------------
+    // Doc ID equals the user's Auth UID, created at signup via:
+    //   setDoc(doc(db, "users", user.uid), { fullName, email, accountType, icNumber, role, ... })
+    match /users/{userId} {
+      // A user can read/write their own profile.
+      // Setiausaha can read/write everyone's profile (user management).
+      allow read, write: if isSignedIn() && (
+        request.auth.uid == userId ||
+        getUserRole() == "Setiausaha"
+      );
+    }
+
+    // ---- residents collection --------------------------------------------
+    // Household records (head of household + family members), created via
+    // addDoc(collection(db, "residents"), {...}) with auto-generated IDs.
+    // Not yet linked to any Resident's Auth UID, so there is no "own
+    // record" rule here — only staff roles have access.
+    match /residents/{residentId} {
+      // Setiausaha: full read/write access (manages the resident database)
+      allow read, write: if isSignedIn() && getUserRole() == "Setiausaha";
+
+      // Ketua Kampung: read-only access (needed for analytics.html)
+      allow read: if isSignedIn() && getUserRole() == "Ketua Kampung";
+    }
+
+    // ---- welfareDrafts collection -----------------------------------------
+    // AI-generated aid distribution drafts (eligibility.js), reviewed and
+    // approved/rejected by Ketua Kampung (approval.html).
+    match /welfareDrafts/{draftId} {
+      // Setiausaha: full read/write access (creates and manages drafts)
+      allow read, write: if isSignedIn() && getUserRole() == "Setiausaha";
+
+      // Ketua Kampung: read pending drafts and update their status
+      // (approve -> "Confirmed" / reject -> "Recalculation")
+      allow read, update: if isSignedIn() && getUserRole() == "Ketua Kampung";
+    }
+
+    // ---- welfare_inventory collection -------------------------------------
+    // Aid stock records managed from inventory.html.
+    match /welfare_inventory/{itemId} {
+      allow read, write: if isSignedIn() && (
+        getUserRole() == "Setiausaha" ||
+        getUserRole() == "Bendahari"
+      );
+    }
+  }
+}

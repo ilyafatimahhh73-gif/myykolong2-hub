@@ -81,8 +81,7 @@
     </div>
 
     <script type="module">
-        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-        import { auth } from "./js/firebase-config.js";
+        import { loginAndRoute } from "./js/login.js";
         import { redirectIfLoggedIn } from "./js/auth.js";
 
         // Initialize Lucide icons safely
@@ -140,9 +139,9 @@
             submitBtn.textContent = 'Signing In...';
 
             try {
-                await signInWithEmailAndPassword(auth, email, password);
-                // Redirect to dashboard on success
-                window.location.href = "dashboard.html";
+                // Authenticate, look up the user's role, and redirect to
+                // their dashboard (see js/login.js)
+                await loginAndRoute(email, password);
 
             } catch (error) {
                 submitBtn.disabled = false;
@@ -156,7 +155,7 @@
                     'auth/too-many-requests': 'Too many failed attempts. Please try again later.',
                 };
 
-                showError(errorMessages[error.code] || 'Sign in failed. Please try again.');
+                showError(errorMessages[error.code] || error.message || 'Sign in failed. Please try again.');
             }
         });
 
