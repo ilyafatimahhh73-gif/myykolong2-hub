@@ -198,7 +198,7 @@
     <!-- Firebase & Main Script -->
     <script type="module">
         import { setupLogoutButton, updateUserDisplay } from "./js/auth.js";
-        import { protectPage } from "./js/authGuard.js";
+        import { protectPage, applyNavVisibility } from "./js/authGuard.js";
         import { initInventory } from "./js/inventory.js";
 
         // Initialize Lucide icons
@@ -209,9 +209,10 @@
         }
 
         // Protect page (Setiausaha + Bendahari)
-        const { user } = await protectPage(["Setiausaha", "Bendahari"]);
+        const { user, role } = await protectPage(["Setiausaha", "Bendahari"]);
         updateUserDisplay(user);
         setupLogoutButton();
+        applyNavVisibility(role);
 
         // Initialize Module
         initInventory();

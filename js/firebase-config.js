@@ -5,7 +5,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebas
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
-const firebaseConfig = {
+export const firebaseConfig = {
     apiKey: "AIzaSyD9-IaN7UXw0fITEy9LlkY1J16rilsebfE",
     authDomain: "mykolong2-hub.firebaseapp.com",
     projectId: "mykolong2-hub",

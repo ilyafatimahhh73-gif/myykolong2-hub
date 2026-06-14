@@ -79,19 +79,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="accountType">Account Type</label>
-                    <div class="select-wrapper">
-                        <select id="accountType">
-                            <option value="resident">Resident</option>
-                            <option value="admin">Admin</option>
-                            <!-- Can add more if needed -->
-                        </select>
-                        <i data-lucide="chevron-down" class="select-icon"></i>
-                    </div>
-                    <p class="field-hint">View personal data and welfare information</p>
-                </div>
-
-                <div class="form-group">
                     <label for="icNumber">IC Number</label>
                     <div class="input-wrapper">
                         <i data-lucide="credit-card" class="input-icon"></i>
@@ -163,7 +150,6 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-            const accountType = document.getElementById('accountType').value;
             const icNumber = document.getElementById('icNumber').value.trim();
 
             // Remove any previous error
@@ -196,17 +182,18 @@
                 // Update display name
                 await updateProfile(user, { displayName: fullName });
 
-                // Save additional info to Firestore
+                // Save additional info to Firestore.
+                // Public signup always creates a Resident account - staff
+                // roles are assigned via register_staff.html (Ketua Kampung only)
+                // or by promoting the first admin manually in the Firebase console.
                 await setDoc(doc(db, "users", user.uid), {
                     fullName: fullName,
                     email: email,
-                    accountType: accountType,
                     icNumber: icNumber,
                     role: "Resident",
                     createdAt: new Date().toISOString()
                 });
 
-                // New signups are Residents - send them to their portal
                 window.location.href = "resident-portal.html";
 
             } catch (error) {

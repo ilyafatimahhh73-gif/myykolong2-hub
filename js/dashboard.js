@@ -1,6 +1,7 @@
-import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { collection, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
 import { requireAuth, setupLogoutButton, updateUserDisplay } from "./auth.js";
+import { applyNavVisibility } from "./authGuard.js";
 
 function classifyIncome(income) {
     if (income <= 4850) return 'B40';
@@ -28,6 +29,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const user = await requireAuth();
     updateUserDisplay(user);
     setupLogoutButton();
+
+    // Hide nav tabs the user's role isn't allowed to open
+    const userSnap = await getDoc(doc(db, "users", user.uid));
+    const role = userSnap.exists() ? userSnap.data().role : null;
+    applyNavVisibility(role);
 
     // DOM Elements
     const kpiTotal = document.getElementById('kpi-total');

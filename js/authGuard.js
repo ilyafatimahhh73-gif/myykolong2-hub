@@ -14,16 +14,33 @@
 //   </script>
 //
 // Per-page allowed roles for this app:
-//   residents.html    -> protectPage(["Setiausaha"])
-//   inventory.html    -> protectPage(["Setiausaha", "Bendahari"])
-//   analytics.html    -> protectPage(["Ketua Kampung", "Setiausaha"])
-//   approval.html     -> protectPage(["Ketua Kampung"])
+//   residents.html       -> protectPage(["Setiausaha"])
+//   inventory.html       -> protectPage(["Setiausaha", "Bendahari"])
+//   analytics.html       -> protectPage(["Ketua Kampung", "Setiausaha"])
+//   approval.html        -> protectPage(["Ketua Kampung"])
+//   register_staff.html  -> protectPage(["Ketua Kampung"])
 //   resident-portal.html -> protectPage(["Resident"])
+//
+// ---- Nav filtering ---------------------------------------------------------
+// On pages with the shared staff navbar (dashboard/residents/welfare/
+// inventory/analytics/admin/transparency), call applyNavVisibility(role)
+// after resolving the role to hide nav-center links the role can't open:
+//
+//   applyNavVisibility(role);
 // ---------------------------------------------------------------------------
 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { auth, db } from "./firebase-config.js";
+
+// Pages each role is allowed to see in the main navbar (.nav-center).
+// Pages not listed here for a role are removed from the nav on that page.
+const ROLE_NAV_PAGES = {
+    "Ketua Kampung": ["dashboard.html", "welfare.html", "analytics.html", "admin.html", "transparency.html"],
+    "Setiausaha": ["dashboard.html", "residents.html", "welfare.html", "inventory.html", "analytics.html", "admin.html", "transparency.html"],
+    "Bendahari": ["dashboard.html", "inventory.html", "admin.html", "transparency.html"],
+    "Resident": []
+};
 
 /**
  * Verify the visitor is signed in and authorized for this page.
@@ -53,5 +70,24 @@ export function protectPage(allowedRoles) {
 
             resolve({ user, role });
         });
+    });
+}
+
+/**
+ * Hide/remove top-nav links the given role isn't allowed to visit.
+ * Call after protectPage()/getDoc() has resolved the user's role.
+ *
+ * @param {string} role - the signed-in user's role
+ */
+export function applyNavVisibility(role) {
+    const allowedPages = ROLE_NAV_PAGES[role] || [];
+    const currentPage = window.location.pathname.split("/").pop() || "dashboard.html";
+
+    document.querySelectorAll(".nav-center .nav-link").forEach((link) => {
+        let href = link.getAttribute("href");
+        if (href === "#") href = currentPage; // active link on its own page
+        if (!allowedPages.includes(href)) {
+            link.remove();
+        }
     });
 }

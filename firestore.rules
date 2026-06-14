@@ -11,6 +11,15 @@ rules_version = '2';
 // accounts, otherwise getUserRole() returns null and they will be locked
 // out of every collection below.
 //
+// ⚠️ BOOTSTRAPPING THE FIRST ADMIN: public signup (index.html) always
+// creates accounts with role "Resident" — there is no self-service way to
+// become Ketua Kampung/Setiausaha/Bendahari. To create the first admin:
+//   1. Sign up normally as a Resident.
+//   2. In the Firebase console, open that user's users/{uid} document and
+//      change role to "Ketua Kampung".
+//   3. That Ketua Kampung can then use register_staff.html to create
+//      Setiausaha and Bendahari accounts for everyone else.
+//
 // Any collection NOT matched below has no "allow" rule and is therefore
 // denied for all reads/writes by default (Firestore's default-deny
 // behaviour).

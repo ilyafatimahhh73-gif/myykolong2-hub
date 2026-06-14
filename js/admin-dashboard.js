@@ -1,6 +1,7 @@
-import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { collection, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
 import { requireAuth, setupLogoutButton, updateUserDisplay } from "./auth.js";
+import { applyNavVisibility } from "./authGuard.js";
 
 function getHouseholdIncome(resident) {
     let total = parseFloat(resident.income) || 0;
@@ -22,6 +23,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const user = await requireAuth();
     updateUserDisplay(user);
     setupLogoutButton();
+
+    // Only Ketua Kampung can see the "Staff Accounts" panel
+    const userSnap = await getDoc(doc(db, "users", user.uid));
+    const role = userSnap.exists() ? userSnap.data().role : null;
+    if (role !== "Ketua Kampung") {
+        const staffPanel = document.getElementById('staff-accounts-panel');
+        if (staffPanel) staffPanel.remove();
+    }
+
+    // Hide nav tabs the user's role isn't allowed to open
+    applyNavVisibility(role);
 
     // Tab Switching Logic
     const tabBtns = document.querySelectorAll('.tab-btn');

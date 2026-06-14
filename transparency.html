@@ -454,7 +454,10 @@
     </div>
 
     <script type="module">
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+        import { db } from "./js/firebase-config.js";
         import { requireAuth, setupLogoutButton, updateUserDisplay } from "./js/auth.js";
+        import { applyNavVisibility } from "./js/authGuard.js";
 
         try {
             lucide.createIcons();
@@ -466,6 +469,11 @@
         const user = await requireAuth();
         updateUserDisplay(user);
         setupLogoutButton();
+
+        // Hide nav tabs the user's role isn't allowed to open
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        const role = userSnap.exists() ? userSnap.data().role : null;
+        applyNavVisibility(role);
 
         // Tab Switching Logic
         const tabBtns = document.querySelectorAll('.tab-btn');

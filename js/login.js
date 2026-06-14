@@ -26,7 +26,7 @@ import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-
 import { auth, db } from "./firebase-config.js";
 
 // Roles that share the staff dashboard
-const ADMIN_ROLES = ["Ketua Kampung", "Setiausaha", "Bendahari"];
+export const ADMIN_ROLES = ["Ketua Kampung", "Setiausaha", "Bendahari"];
 
 /**
  * Sign in with email/password, fetch the user's role from

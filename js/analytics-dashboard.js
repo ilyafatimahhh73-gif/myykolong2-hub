@@ -1,7 +1,7 @@
 import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
 import { setupLogoutButton, updateUserDisplay } from "./auth.js";
-import { protectPage } from "./authGuard.js";
+import { protectPage, applyNavVisibility } from "./authGuard.js";
 import { runEligibilityAnalysis } from "./eligibility.js";
 import { createPaginator } from "./pagination.js";
 
@@ -27,9 +27,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         runBtn.addEventListener('click', runEligibilityAnalysis);
     }
 
-    const { user } = await protectPage(["Ketua Kampung", "Setiausaha"]);
+    const { user, role } = await protectPage(["Ketua Kampung", "Setiausaha"]);
     updateUserDisplay(user);
     setupLogoutButton();
+    applyNavVisibility(role);
 
     // Chart.js Default styling overriding
     if (typeof Chart !== 'undefined') {

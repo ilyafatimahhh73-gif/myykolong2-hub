@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Staff - MyKolong2 Hub</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+</head>
+
+<body class="dashboard-body">
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo-box-small">
+                <i data-lucide="home" class="logo-icon-small"></i>
+            </div>
+            <div class="nav-brand">
+                <h2>MyKolong2 Hub</h2>
+                <span>Village Management System</span>
+            </div>
+        </div>
+
+        <div class="nav-center">
+            <a href="dashboard.html" class="nav-link">
+                <i data-lucide="layout-dashboard"></i>
+                Dashboard
+            </a>
+            <a href="residents.html" class="nav-link">
+                <i data-lucide="users"></i>
+                Residents
+            </a>
+            <a href="welfare.html" class="nav-link">
+                <i data-lucide="heart"></i>
+                Welfare
+            </a>
+            <a href="inventory.html" class="nav-link">
+                <i data-lucide="package"></i>
+                Aid
+            </a>
+            <a href="analytics.html" class="nav-link">
+                <i data-lucide="bar-chart-2"></i>
+                Analytics
+            </a>
+            <a href="admin.html" class="nav-link">
+                <i data-lucide="settings"></i>
+                Admin
+            </a>
+            <a href="transparency.html" class="nav-link">
+                <i data-lucide="shield"></i>
+                Transparency
+            </a>
+        </div>
+
+        <div class="nav-right">
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name">Admin User</span>
+                    <span class="user-role">Ketua Kampung</span>
+                </div>
+                <div class="user-avatar">
+                    <i data-lucide="user"></i>
+                </div>
+            </div>
+            <a href="signin.html" class="logout-btn">
+                <i data-lucide="log-out"></i>
+                Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>Register Staff Account</h1>
+            <p>Create a Setiausaha or Bendahari account. Only Ketua Kampung can access this page.</p>
+        </header>
+
+        <div class="dashboard-card" style="max-width: 480px;">
+            <form id="staffForm">
+                <div class="form-group">
+                    <label for="staffName">Full Name</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="user" class="input-icon"></i>
+                        <input type="text" id="staffName" placeholder="Enter staff member's full name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="staffEmail">Email Address</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="mail" class="input-icon"></i>
+                        <input type="email" id="staffEmail" placeholder="staff@example.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="staffPassword">Temporary Password</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="lock" class="input-icon"></i>
+                        <input type="password" id="staffPassword" placeholder="At least 6 characters">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="staffRole">Role</label>
+                    <div class="select-wrapper">
+                        <select id="staffRole">
+                            <option value="Setiausaha">Setiausaha</option>
+                            <option value="Bendahari">Bendahari</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="select-icon"></i>
+                    </div>
+                    <p class="field-hint">Determines which pages and data this staff member can access</p>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create Staff Account</button>
+            </form>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+        import { firebaseConfig } from "./js/firebase-config.js";
+        import { setupLogoutButton, updateUserDisplay } from "./js/auth.js";
+        import { protectPage } from "./js/authGuard.js";
+
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        } else {
+            console.warn("Lucide icons failed to load. Proceeding without icons.");
+        }
+
+        // Protect this page - Ketua Kampung only
+        const { user } = await protectPage(["Ketua Kampung"]);
+        updateUserDisplay(user);
+        setupLogoutButton();
+
+        const form = document.getElementById('staffForm');
+        const submitBtn = form.querySelector('button[type="submit"]');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fullName = document.getElementById('staffName').value.trim();
+            const email = document.getElementById('staffEmail').value.trim();
+            const password = document.getElementById('staffPassword').value;
+            const role = document.getElementById('staffRole').value;
+
+            if (!fullName || !email || !password) {
+                showMessage('Please fill in all fields.', 'error');
+                return;
+            }
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters.', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating Account...';
+
+            // Create the staff account on a separate Firebase app instance so
+            // this doesn't sign the Ketua Kampung out of their own session.
+            const secondaryApp = initializeApp(firebaseConfig, `StaffRegistration-${Date.now()}`);
+            const secondaryAuth = getAuth(secondaryApp);
+            const secondaryDb = getFirestore(secondaryApp);
+
+            try {
+                const credential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+                const newUser = credential.user;
+
+                await updateProfile(newUser, { displayName: fullName });
+
+                await setDoc(doc(secondaryDb, "users", newUser.uid), {
+                    fullName: fullName,
+                    email: email,
+                    role: role,
+                    createdAt: new Date().toISOString()
+                });
+
+                await signOut(secondaryAuth);
+
+                showMessage(`Staff account created for ${email} as ${role}.`, 'success');
+                form.reset();
+            } catch (error) {
+                const errorMessages = {
+                    'auth/email-already-in-use': 'This email is already registered.',
+                    'auth/invalid-email': 'Please enter a valid email address.',
+                    'auth/weak-password': 'Password is too weak. Use at least 6 characters.',
+                };
+                showMessage(errorMessages[error.code] || error.message || 'Failed to create account.', 'error');
+            } finally {
+                await deleteApp(secondaryApp);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Staff Account';
+            }
+        });
+
+        function showMessage(message, type) {
+            const prevMsg = form.querySelector('.form-message');
+            if (prevMsg) prevMsg.remove();
+
+            const colors = type === 'error'
+                ? 'background: #fee2e2; color: #dc2626;'
+                : 'background: #dcfce7; color: #16a34a;';
+
+            const el = document.createElement('div');
+            el.className = 'form-message';
+            el.style.cssText = `${colors} padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; text-align: center;`;
+            el.textContent = message;
+            form.insertBefore(el, submitBtn);
+        }
+    </script>
+</body>
+
+</html>

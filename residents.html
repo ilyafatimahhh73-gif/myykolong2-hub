@@ -413,7 +413,7 @@
 
     <script type="module">
         import { setupLogoutButton, updateUserDisplay } from "./js/auth.js";
-        import { protectPage } from "./js/authGuard.js";
+        import { protectPage, applyNavVisibility } from "./js/authGuard.js";
         import { listenToResidents } from "./js/residents.js";
 
         try {
@@ -423,9 +423,10 @@
         }
 
         // Protect this page (Setiausaha only)
-        const { user } = await protectPage(["Setiausaha"]);
+        const { user, role } = await protectPage(["Setiausaha"]);
         updateUserDisplay(user);
         setupLogoutButton();
+        applyNavVisibility(role);
 
         // Start real-time Firestore listener
         listenToResidents();
