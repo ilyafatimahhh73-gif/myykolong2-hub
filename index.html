@@ -104,7 +104,7 @@
     </div>
 
     <script type="module">
-        import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+        import { createUserWithEmailAndPassword, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
         import { doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
         import { auth, db } from "./js/firebase-config.js";
         import { redirectIfLoggedIn } from "./js/auth.js";
@@ -158,15 +158,15 @@
 
             // Validation
             if (!fullName || !email || !password) {
-                showError('Please fill in all required fields.');
+                showMessage('Please fill in all required fields.', 'error');
                 return;
             }
             if (password.length < 6) {
-                showError('Password must be at least 6 characters.');
+                showMessage('Password must be at least 6 characters.', 'error');
                 return;
             }
             if (password !== confirmPassword) {
-                showError('Passwords do not match.');
+                showMessage('Passwords do not match.', 'error');
                 return;
             }
 
@@ -194,7 +194,16 @@
                     createdAt: new Date().toISOString()
                 });
 
-                window.location.href = "resident-portal.html";
+                // createUserWithEmailAndPassword signs the new user in automatically;
+                // sign back out so they land on signin.html and must log in themselves.
+                await signOut(auth);
+
+                submitBtn.textContent = 'Account Created!';
+                showMessage('Account created successfully! Redirecting to sign in...', 'success');
+
+                setTimeout(() => {
+                    window.location.href = "signin.html";
+                }, 1500);
 
             } catch (error) {
                 submitBtn.disabled = false;
@@ -207,20 +216,24 @@
                     'auth/weak-password': 'Password is too weak. Use at least 6 characters.',
                 };
 
-                showError(errorMessages[error.code] || 'Error: ' + error.code + ' — ' + error.message);
+                showMessage(errorMessages[error.code] || 'Error: ' + error.code + ' — ' + error.message, 'error');
                 console.error('Firebase Error:', error.code, error.message);
             }
         });
 
-        function showError(message) {
-            const prevError = form.querySelector('.form-error');
-            if (prevError) prevError.remove();
+        function showMessage(message, type) {
+            const prevMsg = form.querySelector('.form-error');
+            if (prevMsg) prevMsg.remove();
 
-            const errorEl = document.createElement('div');
-            errorEl.className = 'form-error';
-            errorEl.style.cssText = 'background: #fee2e2; color: #dc2626; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; text-align: center;';
-            errorEl.textContent = message;
-            form.insertBefore(errorEl, submitBtn);
+            const colors = type === 'success'
+                ? 'background: #dcfce7; color: #166534;'
+                : 'background: #fee2e2; color: #dc2626;';
+
+            const msgEl = document.createElement('div');
+            msgEl.className = 'form-error';
+            msgEl.style.cssText = `${colors} padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; text-align: center;`;
+            msgEl.textContent = message;
+            form.insertBefore(msgEl, submitBtn);
         }
     </script>
 </body>
