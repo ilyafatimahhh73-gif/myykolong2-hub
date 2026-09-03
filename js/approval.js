@@ -117,7 +117,7 @@ function openDraftDetails(draftId, data) {
 
     // EXCEPTION SUB-ROUTINE: Check the whole draft (not just the visible page) for
     // corrupted or missing mandatory attributes
-    const hasExceptions = recipients.some(r => !r.name || !r.ic || r.income === null || r.dependents === null);
+    const hasExceptions = recipients.some(r => !r.name || !r.ic);
     if (hasExceptions) {
         warning.style.display = 'flex';
         approveBtn.disabled = true;
@@ -146,7 +146,7 @@ function renderRecipientRows(visible) {
         const tr = document.createElement('tr');
 
         // Check for corrupted or missing mandatory attributes
-        const isCorrupted = !resident.name || !resident.ic || resident.income === null || resident.dependents === null;
+        const isCorrupted = !resident.name || !resident.ic;
 
         if (isCorrupted) {
             tr.classList.add('incomplete-row');

@@ -106,15 +106,31 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         // 1. Update KPIs
-        const aAvgIncome = document.getElementById('a-avg-income');
-        const aAtRisk = document.getElementById('a-at-risk');
-        
-        if (aAvgIncome) {
-            const avg = total > 0 ? (totalIncomeSum / total) : 0;
-            aAvgIncome.textContent = `RM ${avg.toFixed(0)}`;
-        }
-        if (aAtRisk) {
-            aAtRisk.textContent = atRiskCount;
+        if (total > 0) {
+            const b40Pct = ((b40 / total) * 100).toFixed(1);
+            const m40Pct = ((m40 / total) * 100).toFixed(1);
+            const avg    = Math.round(totalIncomeSum / total);
+
+            const el = (id) => document.getElementById(id);
+            if (el('a-b40-count')) el('a-b40-count').textContent = b40;
+            if (el('a-b40-pct'))   el('a-b40-pct').textContent   = `${b40Pct}% of village`;
+            if (el('a-m40-count')) el('a-m40-count').textContent = m40;
+            if (el('a-m40-pct'))   el('a-m40-pct').textContent   = `${m40Pct}% of village`;
+            if (el('a-avg-income')) el('a-avg-income').textContent = `RM ${avg.toLocaleString()}`;
+            if (el('a-at-risk'))    el('a-at-risk').textContent    = atRiskCount;
+
+            // Insight banner — summarise the village income profile
+            const insightText = el('insightText');
+            if (insightText) {
+                const t20 = total - b40 - m40;
+                const dominant = b40 >= m40 && b40 >= t20 ? 'B40' : m40 >= t20 ? 'M40' : 'T20';
+                insightText.innerHTML = `<span>Village Snapshot:</span> ${total} households recorded — `
+                    + `<strong>${b40} B40</strong> (${b40Pct}%), `
+                    + `<strong>${m40} M40</strong> (${m40Pct}%), `
+                    + `<strong>${t20} T20</strong> (${((t20/total)*100).toFixed(1)}%). `
+                    + `Average household income: <strong>RM ${avg.toLocaleString()}/month</strong>. `
+                    + `${atRiskCount} household${atRiskCount !== 1 ? 's' : ''} flagged as at-risk (B40 + per capita &lt; RM 800).`;
+            }
         }
 
         // 2. Render Early Warning List (sorted by perCapita ascending = highest risk first, paginated)

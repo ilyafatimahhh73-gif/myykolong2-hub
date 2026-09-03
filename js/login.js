@@ -24,6 +24,7 @@
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { auth, db } from "./firebase-config.js";
+import { cacheNavRole } from "./authGuard.js";
 
 // Roles that share the staff dashboard
 export const ADMIN_ROLES = ["Ketua Kampung", "Setiausaha", "Bendahari"];
@@ -50,6 +51,10 @@ export async function loginAndRoute(email, password) {
     }
 
     const role = userSnap.data().role;
+
+    // Cache before redirecting so applyCachedNavVisibility() on the next
+    // page already has the correct role and can filter the nav on first paint.
+    cacheNavRole(role);
 
     // 3. Redirect based on role
     if (ADMIN_ROLES.includes(role)) {

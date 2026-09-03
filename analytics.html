@@ -95,31 +95,31 @@
         <section class="kpi-grid">
             <div class="kpi-card-inline">
                 <div class="kpi-left">
-                    <span class="kpi-big-value text-dark-green" id="a-b40-trend">-8.3%</span>
-                    <span class="kpi-title">B40 Reduction</span>
-                    <span class="kpi-timeframe">Last 6 months</span>
+                    <span class="kpi-big-value text-dark-red" id="a-b40-count">—</span>
+                    <span class="kpi-title">B40 Households</span>
+                    <span class="kpi-timeframe" id="a-b40-pct">— % of village</span>
                 </div>
-                <div class="kpi-icon-large bg-light-green">
-                    <i data-lucide="trending-down" class="text-dark-green"></i>
+                <div class="kpi-icon-large bg-light-red">
+                    <i data-lucide="users" class="text-dark-red"></i>
                 </div>
             </div>
 
             <div class="kpi-card-inline">
                 <div class="kpi-left">
-                    <span class="kpi-big-value text-dark-orange" id="a-m40-trend">+5.2%</span>
-                    <span class="kpi-title">M40 Growth</span>
-                    <span class="kpi-timeframe">Last 6 months</span>
+                    <span class="kpi-big-value text-dark-orange" id="a-m40-count">—</span>
+                    <span class="kpi-title">M40 Households</span>
+                    <span class="kpi-timeframe" id="a-m40-pct">— % of village</span>
                 </div>
                 <div class="kpi-icon-large bg-light-orange">
-                    <i data-lucide="trending-up" class="text-dark-orange"></i>
+                    <i data-lucide="users" class="text-dark-orange"></i>
                 </div>
             </div>
 
             <div class="kpi-card-inline">
                 <div class="kpi-left">
-                    <span class="kpi-big-value" id="a-avg-income">RM 0</span>
-                    <span class="kpi-title">Avg Income</span>
-                    <span class="kpi-timeframe">Village median</span>
+                    <span class="kpi-big-value" id="a-avg-income">RM —</span>
+                    <span class="kpi-title">Avg Household Income</span>
+                    <span class="kpi-timeframe">Per household / month</span>
                 </div>
                 <div class="kpi-icon-large bg-light-blue">
                     <i data-lucide="dollar-sign" class="text-dark-blue"></i>
@@ -128,9 +128,9 @@
 
             <div class="kpi-card-inline">
                 <div class="kpi-left">
-                    <span class="kpi-big-value text-dark-red" id="a-at-risk">0</span>
+                    <span class="kpi-big-value text-dark-red" id="a-at-risk">—</span>
                     <span class="kpi-title">At-Risk Families</span>
-                    <span class="kpi-timeframe">Need intervention</span>
+                    <span class="kpi-timeframe">B40, per capita &lt; RM800</span>
                 </div>
                 <div class="kpi-icon-large bg-light-red">
                     <i data-lucide="alert-triangle" class="text-dark-red"></i>
@@ -156,6 +156,7 @@
                     <div class="filter-wrapper" style="margin-right: 1rem;">
                         <select id="eligibilityFilter">
                             <option value="All">All Residents</option>
+                            <option value="Eligible Only">Eligible Only</option>
                             <option value="B40 Only">B40 Only</option>
                             <option value="OKU Priority">OKU Priority</option>
                         </select>
@@ -176,13 +177,14 @@
                             <th>Per Capita Income</th>
                             <th>Bracket</th>
                             <th>Priority Status</th>
+                            <th>AI Reason Log</th>
                         </tr>
                     </thead>
                     <tbody id="eligibilityTableBody">
                         <tr>
-                            <td colspan="6" style="text-align: center; color: #94a3b8; padding: 3rem;">
+                            <td colspan="7" style="text-align: center; color: #94a3b8; padding: 3rem;">
                                 <i data-lucide="bar-chart" style="width: 48px; height: 48px; opacity: 0.5; margin-bottom: 1rem;"></i><br>
-                                Click "Run Eligibility Analysis" to fetch and calculate priority rankings.
+                                Click "Trigger AI Analytics Engine" to fetch and calculate priority rankings.
                             </td>
                         </tr>
                     </tbody>
@@ -218,10 +220,9 @@
 
         <!-- Income Distribution Bar Chart -->
         <section class="dashboard-card" style="margin-bottom: 2rem;">
-            <div class="insight-banner positive">
-                <div class="insight-text">
-                    <span>Positive Trend:</span> B40 households decreased by 8.3% over the last 6 months, indicating
-                    improved economic conditions.
+            <div class="insight-banner positive" id="insightBanner">
+                <div class="insight-text" id="insightText">
+                    <span>Village Snapshot:</span> Loading income distribution data...
                 </div>
             </div>
             <div class="card-title-area">
@@ -261,6 +262,116 @@
     </main>
 
     <script type="module" src="./js/analytics-dashboard.js"></script>
+
+    <!-- XAI Reason Log Modal -->
+    <div id="xaiModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.55);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:16px;width:min(600px,94vw);max-height:88vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,0.25);display:flex;flex-direction:column;">
+            <!-- Modal Header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:1.5rem 1.75rem 1rem;border-bottom:1px solid #e2e8f0;">
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <div style="background:#eff6ff;border-radius:10px;padding:0.5rem;">
+                        <i data-lucide="brain-circuit" style="width:20px;height:20px;color:#1d4ed8;"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:#0f172a;">AI Eligibility Reason Log</h3>
+                        <p style="margin:0;font-size:0.78rem;color:#64748b;">Explainable AI — decision trace for this household</p>
+                    </div>
+                </div>
+                <button id="xaiModalClose" style="background:none;border:none;cursor:pointer;color:#94a3b8;padding:0.25rem;">
+                    <i data-lucide="x" style="width:20px;height:20px;"></i>
+                </button>
+            </div>
+
+            <!-- Resident Meta -->
+            <div style="padding:1.25rem 1.75rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem 1.5rem;">
+                    <div>
+                        <span style="font-size:0.72rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Resident Name</span>
+                        <p id="xai-name" style="margin:0.2rem 0 0;font-weight:700;color:#0f172a;font-size:0.95rem;"></p>
+                    </div>
+                    <div>
+                        <span style="font-size:0.72rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">MyKad (IC)</span>
+                        <p id="xai-ic" style="margin:0.2rem 0 0;font-weight:600;color:#475569;font-family:monospace;font-size:0.9rem;"></p>
+                    </div>
+                    <div>
+                        <span style="font-size:0.72rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Household Income</span>
+                        <p id="xai-income" style="margin:0.2rem 0 0;font-weight:700;color:#0f172a;font-size:0.95rem;"></p>
+                    </div>
+                    <div>
+                        <span style="font-size:0.72rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Dependents</span>
+                        <p id="xai-dependents" style="margin:0.2rem 0 0;font-weight:700;color:#0f172a;font-size:0.95rem;"></p>
+                    </div>
+                    <div>
+                        <span style="font-size:0.72rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Per Capita Income</span>
+                        <p id="xai-percapita" style="margin:0.2rem 0 0;font-weight:700;color:#0f172a;font-size:0.95rem;"></p>
+                    </div>
+                    <div>
+                        <span style="font-size:0.72rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Income Bracket</span>
+                        <p id="xai-bracket" style="margin:0.2rem 0 0;font-weight:700;color:#0f172a;font-size:0.95rem;"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Reasoning -->
+            <div style="padding:1.5rem 1.75rem;">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.85rem;">
+                    <i data-lucide="file-text" style="width:16px;height:16px;color:#1d4ed8;"></i>
+                    <span style="font-size:0.8rem;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.05em;">Generated Reasoning</span>
+                </div>
+                <div id="xai-reason" style="background:#f1f5f9;border-left:4px solid #1d4ed8;border-radius:0 8px 8px 0;padding:1rem 1.25rem;font-size:0.9rem;line-height:1.65;color:#334155;"></div>
+
+                <div style="margin-top:1.25rem;display:flex;align-items:center;gap:0.4rem;color:#94a3b8;font-size:0.75rem;">
+                    <i data-lucide="clock" style="width:13px;height:13px;"></i>
+                    <span>Analysis timestamp: </span>
+                    <span id="xai-timestamp" style="font-family:monospace;"></span>
+                </div>
+            </div>
+
+            <!-- Footer note -->
+            <div style="padding:0.85rem 1.75rem;border-top:1px solid #e2e8f0;background:#f8fafc;border-radius:0 0 16px 16px;">
+                <p style="margin:0;font-size:0.73rem;color:#94a3b8;line-height:1.5;">
+                    <strong style="color:#64748b;">Note:</strong> This reasoning is generated by a rule-based decision engine using Malaysia's official income classification thresholds (B40/M40/T20). It is not machine-learning. All decisions are deterministic and auditable.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // XAI Modal controller (plain script — no module needed)
+        (function () {
+            const modal = document.getElementById('xaiModal');
+            const closeBtn = document.getElementById('xaiModalClose');
+
+            function openXaiModal(data) {
+                document.getElementById('xai-name').textContent = data.name || '-';
+                document.getElementById('xai-ic').textContent = data.ic || '-';
+                document.getElementById('xai-income').textContent = 'RM ' + Number(data.income).toLocaleString();
+                document.getElementById('xai-dependents').textContent = data.dependents + ' person(s)';
+                document.getElementById('xai-percapita').textContent = 'RM ' + data.percapita;
+                document.getElementById('xai-bracket').textContent = data.bracket;
+                document.getElementById('xai-reason').textContent = data.xai || 'No reasoning recorded.';
+                const ts = data.timestamp ? new Date(data.timestamp).toLocaleString('en-MY') : '-';
+                document.getElementById('xai-timestamp').textContent = ts;
+                modal.style.display = 'flex';
+            }
+
+            function closeModal() {
+                modal.style.display = 'none';
+            }
+
+            closeBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+            // Delegated listener for dynamically rendered buttons
+            document.addEventListener('click', (e) => {
+                const btn = e.target.closest('.xai-reason-btn');
+                if (!btn) return;
+                openXaiModal(btn.dataset);
+                if (typeof lucide !== 'undefined') lucide.createIcons({ attrs: { 'stroke-width': 2 } });
+            });
+        })();
+    </script>
 </body>
 
 </html>

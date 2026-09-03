@@ -1,55 +1,13 @@
-import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { collection, onSnapshot, getDocs, addDoc, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
 import { setupLogoutButton, updateUserDisplay } from "./auth.js";
 import { protectPage, applyNavVisibility, applyCachedNavVisibility } from "./authGuard.js";
 import { createPaginator } from "./pagination.js";
+import { evaluateEligibility, getHouseholdIncome } from "./eligibility-engine.js";
 
 // Apply the last-known role's nav filter immediately, before protectPage()
 // resolves, so the navbar is already correct on first paint.
 applyCachedNavVisibility();
-
-function getHouseholdIncome(resident) {
-    let total = parseFloat(resident.income) || 0;
-    if (resident.familyMembers && resident.familyMembers.length > 0) {
-        resident.familyMembers.forEach(m => {
-            total += parseFloat(m.income) || 0;
-        });
-    }
-    return total;
-}
-
-/** Evaluate eligibility — inlined from residents.js to avoid loading the full module */
-function evaluateEligibility(resident) {
-    const householdIncome = getHouseholdIncome(resident);
-    const category = householdIncome <= 4850 ? 'B40' : householdIncome <= 10970 ? 'M40' : 'T20';
-    const dependents = resident.dependents || 0;
-    const perCapita = dependents > 0 ? householdIncome / (dependents + 1) : householdIncome;
-
-    let hasOku = resident.oku === 'Ya';
-    let hasElderly = parseInt(resident.age) >= 60;
-    if (resident.familyMembers) {
-        resident.familyMembers.forEach(m => {
-            if (m.oku === 'Ya') hasOku = true;
-            if (parseInt(m.age) >= 60) hasElderly = true;
-        });
-    }
-
-    if (category === 'B40') {
-        if (perCapita <= 500 || dependents >= 5)
-            return { status: 'Eligible', priority: 'Very High' };
-        else if (hasOku || hasElderly)
-            return { status: 'Eligible', priority: 'High' };
-        else
-            return { status: 'Eligible', priority: 'Medium' };
-    } else if (category === 'M40') {
-        if ((perCapita <= 800 && dependents >= 3) || hasOku || hasElderly)
-            return { status: 'Eligible', priority: 'Low' };
-        else
-            return { status: 'Not Eligible', priority: 'None' };
-    } else {
-        return { status: 'Not Eligible', priority: 'None' };
-    }
-}
 
 
 function calculatePriorityScore(resident, householdIncome, dependents) {
@@ -290,4 +248,151 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
+
+    // ---- Rejected Drafts ----
+    loadRejectedDrafts();
 });
+
+async function rerunAnalysis(draftId, targetCategory, btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i data-lucide="loader" class="spin" style="width:14px;height:14px;"></i> Running...';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    try {
+        // Delete ALL Recalculation drafts (including this one) before creating new
+        const rejectedSnap = await getDocs(
+            query(collection(db, "welfareDrafts"), where("status", "==", "Recalculation"))
+        );
+        await Promise.all(rejectedSnap.docs.map(d => deleteDoc(doc(db, "welfareDrafts", d.id))));
+
+        // Fetch all residents and run the eligibility engine
+        const residentSnap = await getDocs(collection(db, "residents"));
+        const residentsData = [];
+        residentSnap.forEach(d => residentsData.push({ id: d.id, ...d.data() }));
+
+        const PRIORITY_ORDER = { 'Very High': 0, 'High': 1, 'Medium': 2, 'Low': 3, 'None': 4 };
+        const analysisTimestamp = new Date().toISOString();
+
+        const processed = residentsData.map(resident => {
+            const evalResult = evaluateEligibility(resident);
+            const householdIncome = (parseFloat(resident.income) || 0) +
+                (resident.familyMembers || []).reduce((s, m) => s + (parseFloat(m.income) || 0), 0);
+            const dependents = parseInt(resident.dependents) || 0;
+            const perCapita = householdIncome / (dependents > 0 ? dependents + 1 : 1);
+            let bracket = 'T20 - High Income';
+            if (perCapita < 1169)       bracket = 'B40 - Hardcore Poor';
+            else if (perCapita <= 4850)  bracket = 'B40 - Low Income';
+            else if (perCapita <= 10959) bracket = 'M40 - Middle Income';
+            return {
+                ...resident, householdIncome, perCapita, bracket,
+                isPriority: evalResult.status === 'Eligible',
+                eligibilityStatus: evalResult.status,
+                eligibilityPriority: evalResult.priority,
+                xaiLog: evalResult.reason,
+                analysisTimestamp
+            };
+        });
+
+        processed.sort((a, b) => {
+            const pa = PRIORITY_ORDER[a.eligibilityPriority] ?? 4;
+            const pb = PRIORITY_ORDER[b.eligibilityPriority] ?? 4;
+            return pa !== pb ? pa - pb : a.perCapita - b.perCapita;
+        });
+
+        // Save new draft — onSnapshot will remove the card automatically
+        await addDoc(collection(db, "welfareDrafts"), {
+            targetCategory,
+            status: "Pending Approval",
+            createdAt: analysisTimestamp,
+            createdBy: "Setiausaha",
+            recipients: processed.map(r => ({
+                id: r.id,
+                name: r.name || null,
+                ic: r.ic || null,
+                income: r.householdIncome,
+                dependents: r.dependents ?? null,
+                oku: r.oku || null,
+                perCapita: r.perCapita,
+                bracket: r.bracket,
+                isPriority: r.isPriority,
+                eligibilityStatus: r.eligibilityStatus,
+                eligibilityPriority: r.eligibilityPriority,
+                xaiLog: r.xaiLog
+            }))
+        });
+
+        showToast('New draft sent to Ketua Kampung for approval.');
+
+    } catch (err) {
+        console.error('Re-run failed:', err);
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="rotate-ccw" style="width:14px;height:14px;"></i> Re-run Analysis';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        alert('Re-run failed: ' + err.message);
+    }
+}
+
+function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.textContent = msg;
+    toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#0f172a;color:white;padding:0.75rem 1.5rem;border-radius:8px;font-size:0.875rem;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.2);';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+
+function loadRejectedDrafts() {
+    const container = document.getElementById('rejectedDraftsContainer');
+    if (!container) return;
+
+    const q = query(collection(db, "welfareDrafts"), where("status", "==", "Recalculation"));
+
+    onSnapshot(q, (snap) => {
+        if (snap.empty) {
+            container.innerHTML = `
+                <div style="text-align:center;color:#94a3b8;padding:2rem;">
+                    <i data-lucide="check-circle" style="width:32px;height:32px;margin-bottom:0.5rem;opacity:0.4;display:block;margin-inline:auto;"></i>
+                    No rejected drafts. All submitted drafts have been approved.
+                </div>`;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            return;
+        }
+
+        container.innerHTML = '';
+
+        snap.forEach(docSnap => {
+            const d = docSnap.data();
+            const createdDate = d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+            const updatedDate = d.updatedAt ? new Date(d.updatedAt).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+            const recipientCount = d.recipients?.length || 0;
+
+            const card = document.createElement('div');
+            card.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:1.1rem 1.25rem;border:1px solid #fca5a5;border-left:4px solid #ef4444;border-radius:8px;background:#fff;margin-bottom:0.75rem;gap:1rem;flex-wrap:wrap;';
+            card.innerHTML = `
+                <div>
+                    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.3rem;">
+                        <i data-lucide="x-circle" style="width:15px;height:15px;color:#ef4444;"></i>
+                        <span style="font-weight:700;color:#0f172a;font-size:0.95rem;">${d.targetCategory || 'General Welfare'}</span>
+                        <span style="background:#fee2e2;color:#ef4444;padding:2px 8px;border-radius:999px;font-size:0.7rem;font-weight:700;">Rejected</span>
+                    </div>
+                    <p style="margin:0;font-size:0.8rem;color:#64748b;">
+                        Created by ${d.createdBy || 'Setiausaha'} on ${createdDate} &bull; ${recipientCount} households &bull; Rejected on ${updatedDate}
+                    </p>
+                </div>
+                <button class="rerun-btn" style="display:inline-flex;align-items:center;gap:0.4rem;background:#0f172a;color:white;padding:0.5rem 1rem;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;border:none;white-space:nowrap;">
+                    <i data-lucide="rotate-ccw" style="width:14px;height:14px;"></i> Re-run Analysis
+                </button>
+            `;
+
+            const btn = card.querySelector('.rerun-btn');
+            btn.addEventListener('click', () => rerunAnalysis(docSnap.id, d.targetCategory || 'General Welfare', btn));
+
+            container.appendChild(card);
+        });
+
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    }, (err) => {
+        console.error('Failed to load rejected drafts:', err);
+        container.innerHTML = `<div style="color:#ef4444;padding:1rem;font-size:0.875rem;">Could not load rejected drafts: ${err.message}</div>`;
+    });
+}

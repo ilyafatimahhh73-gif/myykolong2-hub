@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restore Residents — MyKolong2 Hub Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #0f172a; padding: 2rem; }
+        .card { background: white; border-radius: 12px; padding: 2rem; max-width: 700px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h1 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.25rem; }
+        p.sub { color: #64748b; font-size: 0.875rem; margin-bottom: 1.5rem; }
+        .warning { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 0.85rem 1rem; font-size: 0.85rem; color: #92400e; margin-bottom: 1.5rem; }
+        label { display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: .04em; }
+        input[type=file] { display: block; width: 100%; padding: 0.65rem; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 0.9rem; margin-bottom: 1.25rem; cursor: pointer; }
+        button { background: #10b981; color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-weight: 700; font-size: 0.9rem; cursor: pointer; width: 100%; }
+        button:disabled { background: #94a3b8; cursor: not-allowed; }
+        #log { margin-top: 1.5rem; background: #0f172a; color: #94a3b8; border-radius: 8px; padding: 1rem; font-family: monospace; font-size: 0.8rem; height: 300px; overflow-y: auto; white-space: pre-wrap; }
+        .ok  { color: #34d399; }
+        .err { color: #f87171; }
+        .info { color: #60a5fa; }
+        #summary { margin-top: 1rem; padding: 0.85rem 1rem; border-radius: 8px; font-size: 0.875rem; display: none; }
+        .summary-ok  { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+        .summary-err { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>Restore Residents from Backup</h1>
+    <p class="sub">Imports the Firestore REST API backup JSON into the residents collection.</p>
+
+    <div class="warning">
+        ⚠️ <strong>Admin only.</strong> This page must be opened while logged in as an admin (Ketua Kampung / Setiausaha). Existing documents with the same ID will be overwritten.
+    </div>
+
+    <label for="fileInput">Select backup JSON file</label>
+    <input type="file" id="fileInput" accept=".json">
+
+    <button id="restoreBtn" disabled>Select a file first</button>
+
+    <div id="log"></div>
+    <div id="summary"></div>
+</div>
+
+<script type="module">
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+    import { doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+    import { auth, db } from "./js/firebase-config.js";
+
+    const fileInput  = document.getElementById('fileInput');
+    const restoreBtn = document.getElementById('restoreBtn');
+    const logEl      = document.getElementById('log');
+    const summaryEl  = document.getElementById('summary');
+
+    let parsedDocs = [];
+
+    // --- Firestore REST → plain JS value converter ---
+    function convertValue(v) {
+        if (v === undefined || v === null) return null;
+        if ('stringValue'  in v) return v.stringValue;
+        if ('integerValue' in v) return parseInt(v.integerValue, 10);
+        if ('doubleValue'  in v) return parseFloat(v.doubleValue);
+        if ('booleanValue' in v) return v.booleanValue;
+        if ('nullValue'    in v) return null;
+        if ('arrayValue'   in v) {
+            return (v.arrayValue.values || []).map(convertValue);
+        }
+        if ('mapValue' in v) {
+            const out = {};
+            for (const [k, fv] of Object.entries(v.mapValue.fields || {})) {
+                out[k] = convertValue(fv);
+            }
+            return out;
+        }
+        return null;
+    }
+
+    function parseBackup(raw) {
+        return raw.map(entry => {
+            const pathParts = entry.name.split('/');
+            const docId = pathParts[pathParts.length - 1];
+            const data  = {};
+            for (const [k, v] of Object.entries(entry.fields || {})) {
+                data[k] = convertValue(v);
+            }
+            return { docId, data };
+        });
+    }
+
+    // --- File input ---
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+                const raw = JSON.parse(e.target.result);
+                parsedDocs = parseBackup(raw);
+                restoreBtn.disabled = false;
+                restoreBtn.textContent = `Restore ${parsedDocs.length} residents`;
+                log(`[info] Parsed ${parsedDocs.length} records from "${file.name}". Click Restore to begin.`, 'info');
+            } catch (err) {
+                log(`[error] Could not parse file: ${err.message}`, 'err');
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    // --- Auth guard ---
+    onAuthStateChanged(auth, user => {
+        if (!user) {
+            restoreBtn.disabled = true;
+            restoreBtn.textContent = 'Not logged in — open signin.html first';
+            log('[error] No authenticated user. Open signin.html and log in as an admin, then come back.', 'err');
+        }
+    });
+
+    // --- Restore ---
+    restoreBtn.addEventListener('click', async () => {
+        if (!parsedDocs.length) return;
+        restoreBtn.disabled = true;
+        logEl.textContent = '';
+        summaryEl.style.display = 'none';
+
+        let ok = 0, failed = 0;
+
+        for (const { docId, data } of parsedDocs) {
+            try {
+                await setDoc(doc(db, 'residents', docId), data);
+                ok++;
+                log(`[ok] Restored: ${data.name || docId} (${data.ic || 'no IC'})`, 'ok');
+            } catch (err) {
+                failed++;
+                log(`[error] Failed ${docId}: ${err.message}`, 'err');
+            }
+        }
+
+        const total = ok + failed;
+        if (failed === 0) {
+            summaryEl.className = 'summary-ok';
+            summaryEl.textContent = `✓ All ${ok} residents restored successfully.`;
+        } else {
+            summaryEl.className = 'summary-err';
+            summaryEl.textContent = `Completed with errors: ${ok}/${total} restored, ${failed} failed. Check the log above.`;
+        }
+        summaryEl.style.display = 'block';
+        restoreBtn.disabled = false;
+        restoreBtn.textContent = 'Restore again';
+    });
+
+    function log(msg, cls) {
+        const span = document.createElement('span');
+        span.className = cls || '';
+        span.textContent = msg + '\n';
+        logEl.appendChild(span);
+        logEl.scrollTop = logEl.scrollHeight;
+    }
+</script>
+</body>
+</html>

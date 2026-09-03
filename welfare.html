@@ -87,6 +87,24 @@
             <p>Automated household categorization and aid prioritization</p>
         </header>
 
+        <!-- Rejected Drafts Section — shown first so Setiausaha sees required actions immediately -->
+        <div class="dashboard-card" style="margin-bottom: 1.5rem; border: 1.5px solid #fca5a5;" id="rejectedDraftsCard">
+            <div class="card-title-area" style="margin-bottom: 1.25rem;">
+                <div>
+                    <h3 style="display:flex;align-items:center;gap:0.5rem;">
+                        <i data-lucide="rotate-ccw" style="width:18px;height:18px;color:#ef4444;"></i>
+                        Drafts Requiring Recalculation
+                    </h3>
+                    <p>Welfare drafts rejected by Ketua Kampung — re-run the AI analysis to generate a new draft</p>
+                </div>
+            </div>
+            <div id="rejectedDraftsContainer">
+                <div style="text-align:center;color:#94a3b8;padding:2rem;">
+                    <i data-lucide="loader" class="spin"></i> Loading...
+                </div>
+            </div>
+        </div>
+
         <!-- Alert Banner -->
         <div class="welfare-alert-banner">
             <i data-lucide="alert-circle" class="alert-circle-icon"></i>

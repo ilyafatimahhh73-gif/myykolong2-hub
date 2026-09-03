@@ -72,38 +72,165 @@
             <p>Welfare aid eligibility alerts and collection schedules.</p>
         </header>
 
-        <div class="kpi-card" style="max-width: 480px;">
-            <div class="kpi-header">
-                <span>Notification Reminders</span>
-                <div class="kpi-icon-box bg-yellow">
-                    <i data-lucide="construction" class="text-yellow"></i>
+        <!-- Welfare Eligibility Status Card -->
+        <section style="max-width:680px;">
+            <div class="dashboard-card" style="padding:0;overflow:hidden;">
+                <!-- Card Header -->
+                <div style="display:flex;align-items:center;gap:0.75rem;padding:1.25rem 1.5rem;border-bottom:1px solid #e2e8f0;background:#f8fafc;">
+                    <div style="background:#eff6ff;border-radius:10px;padding:0.55rem;">
+                        <i data-lucide="brain-circuit" style="width:20px;height:20px;color:#1d4ed8;"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0;font-size:1rem;font-weight:700;color:#0f172a;">AI Welfare Eligibility Status</h3>
+                        <p style="margin:0;font-size:0.78rem;color:#64748b;">Your household's eligibility based on the latest analysis</p>
+                    </div>
+                </div>
+
+                <!-- Loading state -->
+                <div id="eligibility-loading" style="padding:2.5rem;text-align:center;color:#94a3b8;">
+                    <i data-lucide="loader" style="width:32px;height:32px;margin-bottom:0.75rem;" class="spin"></i>
+                    <p style="margin:0;font-size:0.9rem;">Checking your eligibility status...</p>
+                </div>
+
+                <!-- Result (hidden until loaded) -->
+                <div id="eligibility-result" style="display:none;padding:1.5rem;">
+                    <!-- Status Badge -->
+                    <div id="eligibility-badge" style="display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;border-radius:10px;margin-bottom:1.25rem;">
+                        <i data-lucide="check-circle" style="width:28px;height:28px;flex-shrink:0;" id="eligibility-icon"></i>
+                        <div>
+                            <p style="margin:0;font-size:1.05rem;font-weight:700;" id="eligibility-status-text"></p>
+                            <p style="margin:0.2rem 0 0;font-size:0.82rem;opacity:0.8;" id="eligibility-priority-text"></p>
+                        </div>
+                    </div>
+
+                    <!-- Household Facts -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem 1.25rem;margin-bottom:1.25rem;">
+                        <div>
+                            <span style="font-size:0.72rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Household Income</span>
+                            <p id="n-income" style="margin:0.15rem 0 0;font-weight:700;color:#0f172a;font-size:0.95rem;"></p>
+                        </div>
+                        <div>
+                            <span style="font-size:0.72rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Dependents</span>
+                            <p id="n-dependents" style="margin:0.15rem 0 0;font-weight:700;color:#0f172a;font-size:0.95rem;"></p>
+                        </div>
+                        <div>
+                            <span style="font-size:0.72rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Per Capita Income</span>
+                            <p id="n-percapita" style="margin:0.15rem 0 0;font-weight:700;color:#0f172a;font-size:0.95rem;"></p>
+                        </div>
+                        <div>
+                            <span style="font-size:0.72rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Income Bracket</span>
+                            <p id="n-bracket" style="margin:0.15rem 0 0;font-weight:700;color:#0f172a;font-size:0.95rem;"></p>
+                        </div>
+                    </div>
+
+                    <!-- AI Reasoning -->
+                    <div style="margin-bottom:1rem;">
+                        <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.6rem;">
+                            <i data-lucide="file-text" style="width:15px;height:15px;color:#1d4ed8;"></i>
+                            <span style="font-size:0.75rem;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.05em;">Reason Log</span>
+                        </div>
+                        <div id="n-reason" style="background:#f1f5f9;border-left:4px solid #1d4ed8;border-radius:0 8px 8px 0;padding:0.9rem 1.1rem;font-size:0.875rem;line-height:1.65;color:#334155;"></div>
+                    </div>
+
+                    <p style="margin:0;font-size:0.72rem;color:#94a3b8;">
+                        <i data-lucide="info" style="width:12px;height:12px;vertical-align:middle;"></i>
+                        This is generated by a rule-based AI engine using Malaysia's official income classification thresholds (B40/M40/T20). If you believe your data is incorrect, please contact the village office.
+                    </p>
+                </div>
+
+                <!-- Not found state -->
+                <div id="eligibility-notfound" style="display:none;padding:2rem 1.5rem;text-align:center;color:#64748b;">
+                    <i data-lucide="user-x" style="width:36px;height:36px;margin-bottom:0.75rem;opacity:0.5;"></i>
+                    <p style="margin:0;font-size:0.9rem;">No resident record was found linked to your account.<br>Please contact the village office to register your household.</p>
                 </div>
             </div>
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">
-                This page is under construction. Soon you'll be able to view your household's
-                welfare aid eligibility status and collection schedules here.
-            </p>
-        </div>
+        </section>
     </main>
 
     <script type="module">
         import { protectPage, applyNavVisibility, applyCachedNavVisibility } from "./js/authGuard.js";
         import { updateUserDisplay, setupLogoutButton } from "./js/auth.js";
+        import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+        import { db } from "./js/firebase-config.js";
+        import { evaluateEligibility, getHouseholdIncome } from "./js/eligibility-engine.js";
 
-        // Apply the last-known role's nav filter immediately, before protectPage()
-        // resolves, so the navbar is already correct on first paint.
         applyCachedNavVisibility();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
 
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        } else {
-            console.warn("Lucide icons failed to load. Proceeding without icons.");
+        const loadingEl  = document.getElementById('eligibility-loading');
+        const resultEl   = document.getElementById('eligibility-result');
+        const notfoundEl = document.getElementById('eligibility-notfound');
+
+        function showNotFound(msg) {
+            loadingEl.style.display = 'none';
+            notfoundEl.style.display = 'block';
+            if (msg) notfoundEl.querySelector('p').textContent = msg;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
-        const { user, role } = await protectPage(["Resident"]);
-        updateUserDisplay(user);
-        setupLogoutButton();
-        applyNavVisibility(role);
+        (async () => {
+            try {
+                const { user, role } = await protectPage(["Resident"]);
+                updateUserDisplay(user);
+                setupLogoutButton();
+                applyNavVisibility(role);
+
+                const userSnap = await getDoc(doc(db, "users", user.uid));
+                const icNumber = userSnap.exists() ? userSnap.data().icNumber : null;
+
+                if (!icNumber) {
+                    showNotFound('Your account has no IC number linked. Please contact the village office.');
+                    return;
+                }
+
+                const residentsSnap = await getDocs(
+                    query(collection(db, "residents"), where("ic", "==", icNumber))
+                );
+
+                if (residentsSnap.empty) {
+                    showNotFound(`No resident record found for IC: ${icNumber}. Please contact the village office.`);
+                    return;
+                }
+
+                const residentData = { id: residentsSnap.docs[0].id, ...residentsSnap.docs[0].data() };
+                const result = evaluateEligibility(residentData);
+
+                const householdIncome = getHouseholdIncome(residentData);
+                const dependents = parseInt(residentData.dependents) || 0;
+                const perCapita  = householdIncome / (dependents > 0 ? dependents + 1 : 1);
+
+                let bracket = 'T20 - High Income';
+                if (perCapita < 1169)        bracket = 'B40 - Hardcore Poor';
+                else if (perCapita <= 4850)  bracket = 'B40 - Low Income';
+                else if (perCapita <= 10959) bracket = 'M40 - Middle Income';
+
+                const badge = document.getElementById('eligibility-badge');
+                badge.style.background = result.bg;
+                badge.style.color = result.color;
+                document.getElementById('eligibility-icon').style.color = result.color;
+
+                document.getElementById('eligibility-status-text').textContent =
+                    result.status === 'Not Eligible' ? 'Not Eligible' : `${result.status} — ${result.priority} Priority`;
+                document.getElementById('eligibility-priority-text').textContent =
+                    result.status === 'Eligible'
+                        ? 'Your household qualifies for welfare aid consideration.'
+                        : 'Your household does not currently meet eligibility criteria.';
+
+                document.getElementById('n-income').textContent     = `RM ${householdIncome.toLocaleString()}`;
+                document.getElementById('n-dependents').textContent = `${dependents} person(s)`;
+                document.getElementById('n-percapita').textContent  = `RM ${perCapita.toFixed(2)}`;
+                document.getElementById('n-bracket').textContent    = bracket;
+                document.getElementById('n-reason').textContent     = result.reason;
+
+                loadingEl.style.display = 'none';
+                resultEl.style.display  = 'block';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            } catch (err) {
+                console.error('Eligibility check failed:', err);
+                showNotFound('Could not load eligibility data. Please try again later.');
+            }
+        })();
     </script>
 </body>
 

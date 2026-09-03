@@ -62,6 +62,11 @@ service cloud.firestore {
 
       // Ketua Kampung: read-only access (needed for analytics.html)
       allow read: if isSignedIn() && getUserRole() == "Ketua Kampung";
+
+      // Resident: read their own household record (IC must match their profile)
+      allow read: if isSignedIn()
+        && getUserRole() == "Resident"
+        && resource.data.ic == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.icNumber;
     }
 
     // ---- welfareDrafts collection -----------------------------------------
