@@ -305,6 +305,7 @@ async function rerunAnalysis(draftId, targetCategory, btn) {
             status: "Pending Approval",
             createdAt: analysisTimestamp,
             createdBy: "Setiausaha",
+            recipientICs: processed.map(r => r.ic).filter(Boolean),
             recipients: processed.map(r => ({
                 id: r.id,
                 name: r.name || null,

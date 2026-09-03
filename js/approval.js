@@ -1,4 +1,4 @@
-import { collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { collection, getDocs, doc, updateDoc, setDoc, writeBatch, query, where } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
 import { setupLogoutButton, updateUserDisplay } from "./auth.js";
 import { protectPage, applyNavVisibility, applyCachedNavVisibility } from "./authGuard.js";
@@ -9,6 +9,7 @@ import { createPaginator } from "./pagination.js";
 applyCachedNavVisibility();
 
 let currentDraftId = null;
+let currentDraftData = null;
 
 // Pagination
 const draftsPaginator = createPaginator({
@@ -102,6 +103,7 @@ function renderDraftCards(drafts) {
 // Render the details of a specific draft
 function openDraftDetails(draftId, data) {
     currentDraftId = draftId;
+    currentDraftData = data;
     const detailsView = document.getElementById('draftDetailsView');
     const warning = document.getElementById('exceptionWarning');
     const approveBtn = document.getElementById('approveBtn');
@@ -183,6 +185,7 @@ function renderRecipientRows(visible) {
 function closeDetails() {
     document.getElementById('draftDetailsView').classList.remove('active');
     currentDraftId = null;
+    currentDraftData = null;
 }
 
 // Update document status in Firestore
@@ -190,12 +193,35 @@ async function updateDraftStatus(newStatus) {
     if (!currentDraftId) return;
 
     try {
-        // Update Firestore
+        const approvedAt = new Date().toISOString();
+
+        // Update draft status
         const docRef = doc(db, "welfareDrafts", currentDraftId);
-        await updateDoc(docRef, {
-            status: newStatus,
-            updatedAt: new Date().toISOString()
-        });
+        await updateDoc(docRef, { status: newStatus, updatedAt: approvedAt });
+
+        // On approval: write one approvedResidents/{ic} doc per eligible recipient
+        if (newStatus === 'Confirmed' && currentDraftData) {
+            const eligible = (currentDraftData.recipients || [])
+                .filter(r => r.ic && r.eligibilityStatus === 'Eligible');
+
+            // Batch in chunks of 500 (Firestore batch limit)
+            for (let i = 0; i < eligible.length; i += 500) {
+                const batch = writeBatch(db);
+                eligible.slice(i, i + 500).forEach(r => {
+                    const safeId = r.ic.replace(/\//g, '_');
+                    batch.set(doc(db, "approvedResidents", safeId), {
+                        ic: r.ic,
+                        name: r.name || null,
+                        targetCategory: currentDraftData.targetCategory || 'General Welfare',
+                        eligibilityPriority: r.eligibilityPriority || 'Medium',
+                        xaiLog: r.xaiLog || null,
+                        approvedAt,
+                        draftId: currentDraftId
+                    });
+                });
+                await batch.commit();
+            }
+        }
 
         // Show Success Banner
         const banner = document.getElementById('successBanner');

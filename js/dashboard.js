@@ -56,8 +56,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         let t20 = 0;
 
         snapshot.forEach(doc => {
-            total++;
             const data = doc.data();
+            // Count head of household + every family member
+            total += 1 + (data.familyMembers ? data.familyMembers.length : 0);
             const income = getHouseholdIncome(data);
             const category = classifyIncome(income);
             if (category === 'B40') b40++;
@@ -97,7 +98,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             let completeRecords = 0;
             snapshot.forEach(doc => {
                 const data = doc.data();
-                if (data.name && data.ic && data.income !== undefined) completeRecords++;
+                if (data.name && data.ic && data.income !== undefined) {
+                    completeRecords += 1 + (data.familyMembers ? data.familyMembers.length : 0);
+                }
             });
             const ratio = total > 0 ? (completeRecords / total) * 100 : 0;
             progressFill.style.width = `${ratio}%`;
@@ -106,5 +109,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     }, (error) => {
         console.error("Dashboard DB Error:", error);
+        if (kpiTotal) {
+            kpiTotal.textContent = '—';
+            kpiTotalSub.textContent = 'Permission error — contact admin';
+        }
     });
 });

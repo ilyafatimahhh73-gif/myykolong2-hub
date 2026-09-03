@@ -293,13 +293,15 @@ function renderTable(persons) {
 
 function updateKPIs(residents) {
     let b40 = 0, m40 = 0, t20 = 0;
+    let totalPeople = 0;
     residents.forEach(r => {
+        totalPeople += 1 + (r.familyMembers ? r.familyMembers.length : 0);
         const cat = classifyIncome(getHouseholdIncome(r));
         if (cat === 'B40') b40++;
         else if (cat === 'M40') m40++;
         else t20++;
     });
-    kpiTotal.textContent = residents.length;
+    kpiTotal.textContent = totalPeople;
     kpiB40.textContent = b40;
     kpiM40.textContent = m40;
     kpiT20.textContent = t20;

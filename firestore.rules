@@ -60,8 +60,11 @@ service cloud.firestore {
       // Setiausaha: full read/write access (manages the resident database)
       allow read, write: if isSignedIn() && getUserRole() == "Setiausaha";
 
-      // Ketua Kampung: read-only access (needed for analytics.html)
-      allow read: if isSignedIn() && getUserRole() == "Ketua Kampung";
+      // Ketua Kampung + Bendahari: read-only (analytics, dashboard KPIs, budget planning)
+      allow read: if isSignedIn() && (
+        getUserRole() == "Ketua Kampung" ||
+        getUserRole() == "Bendahari"
+      );
 
       // Resident: read their own household record (IC must match their profile)
       allow read: if isSignedIn()
@@ -79,6 +82,22 @@ service cloud.firestore {
       // Ketua Kampung: read pending drafts and update their status
       // (approve -> "Confirmed" / reject -> "Recalculation")
       allow read, update: if isSignedIn() && getUserRole() == "Ketua Kampung";
+
+    }
+
+    // ---- approvedResidents collection ------------------------------------
+    // One document per eligible resident (doc ID = IC number), written when
+    // Ketua Kampung approves a welfare draft. Residents read their own record.
+    match /approvedResidents/{docId} {
+      allow read, write: if isSignedIn() && (
+        getUserRole() == "Setiausaha" ||
+        getUserRole() == "Ketua Kampung"
+      );
+      // Resident reads their own approval doc — compare the ic field, not the doc ID
+      // (doc ID has slashes replaced with underscores to avoid path issues)
+      allow read: if isSignedIn()
+        && getUserRole() == "Resident"
+        && resource.data.ic == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.icNumber;
     }
 
     // ---- welfare_inventory collection -------------------------------------

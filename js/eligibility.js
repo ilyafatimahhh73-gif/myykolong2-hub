@@ -103,6 +103,7 @@ export async function runEligibilityAnalysis() {
             status: "Pending Approval",
             createdAt: analysisTimestamp,
             createdBy: "Setiausaha",
+            recipientICs: processedResidents.map(r => r.ic).filter(Boolean),
             recipients: processedResidents.map(r => ({
                 id: r.id,
                 name: r.name || null,

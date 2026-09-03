@@ -72,6 +72,66 @@
             <p>Welfare aid eligibility alerts and collection schedules.</p>
         </header>
 
+        <!-- Aid Approval Status Card -->
+        <section style="max-width:680px;margin-bottom:1.5rem;">
+            <div class="dashboard-card" style="padding:0;overflow:hidden;">
+                <div style="display:flex;align-items:center;gap:0.75rem;padding:1.25rem 1.5rem;border-bottom:1px solid #e2e8f0;background:#f8fafc;">
+                    <div style="background:#f0fdf4;border-radius:10px;padding:0.55rem;">
+                        <i data-lucide="shield-check" style="width:20px;height:20px;color:#16a34a;"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0;font-size:1rem;font-weight:700;color:#0f172a;">Aid Approval Status</h3>
+                        <p style="margin:0;font-size:0.78rem;color:#64748b;">Official welfare aid decision from Ketua Kampung</p>
+                    </div>
+                </div>
+
+                <!-- Loading -->
+                <div id="aid-loading" style="padding:2rem;text-align:center;color:#94a3b8;">
+                    <i data-lucide="loader" style="width:28px;height:28px;" class="spin"></i>
+                </div>
+
+                <!-- Approved -->
+                <div id="aid-approved" style="display:none;padding:1.5rem;">
+                    <div style="display:flex;align-items:flex-start;gap:1rem;background:#f0fdf4;border:1px solid #86efac;border-left:4px solid #16a34a;border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:1.25rem;">
+                        <i data-lucide="check-circle-2" style="width:28px;height:28px;color:#16a34a;flex-shrink:0;margin-top:0.1rem;"></i>
+                        <div>
+                            <p style="margin:0;font-size:1rem;font-weight:700;color:#15803d;">Approved for Welfare Aid</p>
+                            <p style="margin:0.25rem 0 0;font-size:0.85rem;color:#166534;" id="aid-category-text"></p>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem 1.25rem;margin-bottom:1.1rem;">
+                        <div>
+                            <span style="font-size:0.72rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Aid Category</span>
+                            <p id="aid-category" style="margin:0.15rem 0 0;font-weight:700;color:#0f172a;font-size:0.95rem;"></p>
+                        </div>
+                        <div>
+                            <span style="font-size:0.72rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Approved On</span>
+                            <p id="aid-approved-date" style="margin:0.15rem 0 0;font-weight:700;color:#0f172a;font-size:0.95rem;"></p>
+                        </div>
+                        <div>
+                            <span style="font-size:0.72rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Priority Level</span>
+                            <p id="aid-priority" style="margin:0.15rem 0 0;font-weight:700;color:#0f172a;font-size:0.95rem;"></p>
+                        </div>
+                        <div>
+                            <span style="font-size:0.72rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Collection Schedule</span>
+                            <p id="aid-collection" style="margin:0.15rem 0 0;font-weight:600;color:#d97706;font-size:0.9rem;">To be announced</p>
+                        </div>
+                    </div>
+                    <p style="margin:0;font-size:0.78rem;color:#64748b;background:#f8fafc;border-radius:8px;padding:0.75rem 1rem;">
+                        <i data-lucide="info" style="width:13px;height:13px;vertical-align:middle;"></i>
+                        Please visit the village office to collect your aid. Bring your MyKad and this notification as reference.
+                    </p>
+                </div>
+
+                <!-- Not approved -->
+                <div id="aid-not-approved" style="display:none;padding:1.5rem;text-align:center;color:#64748b;">
+                    <i data-lucide="clock" style="width:36px;height:36px;margin-bottom:0.75rem;opacity:0.4;"></i>
+                    <p style="margin:0;font-size:0.9rem;font-weight:600;color:#475569;">No Active Aid Approval</p>
+                    <p style="margin:0.4rem 0 0;font-size:0.82rem;">You have not been selected in any currently approved welfare distribution. If you believe this is an error, please contact the village office.</p>
+                </div>
+            </div>
+        </section>
+
         <!-- Welfare Eligibility Status Card -->
         <section style="max-width:680px;">
             <div class="dashboard-card" style="padding:0;overflow:hidden;">
@@ -224,6 +284,10 @@
 
                 loadingEl.style.display = 'none';
                 resultEl.style.display  = 'block';
+
+                // Load aid approval status in parallel
+                await loadAidApproval(icNumber, result.priority);
+
                 if (typeof lucide !== 'undefined') lucide.createIcons();
 
             } catch (err) {
@@ -231,6 +295,51 @@
                 showNotFound('Could not load eligibility data. Please try again later.');
             }
         })();
+
+        async function loadAidApproval(icNumber, priority) {
+            const aidLoadingEl     = document.getElementById('aid-loading');
+            const aidApprovedEl    = document.getElementById('aid-approved');
+            const aidNotApprovedEl = document.getElementById('aid-not-approved');
+
+            try {
+                // approvedResidents uses sanitized IC as doc ID (slashes → underscores)
+                const safeIc = icNumber.replace(/\//g, '_');
+                const approvedDoc = await getDoc(doc(db, "approvedResidents", safeIc));
+
+                aidLoadingEl.style.display = 'none';
+
+                if (!approvedDoc.exists()) {
+                    aidNotApprovedEl.style.display = 'block';
+                    return;
+                }
+
+                const d = approvedDoc.data();
+                const approvedDate = d.approvedAt
+                    ? new Date(d.approvedAt).toLocaleDateString('en-MY', { day: 'numeric', month: 'long', year: 'numeric' })
+                    : '-';
+
+                document.getElementById('aid-category-text').textContent =
+                    `Your household has been approved for ${d.targetCategory || 'Welfare Aid'}.`;
+                document.getElementById('aid-category').textContent  = d.targetCategory || 'General Welfare';
+                document.getElementById('aid-approved-date').textContent = approvedDate;
+                document.getElementById('aid-priority').textContent  =
+                    d.eligibilityPriority && d.eligibilityPriority !== 'None'
+                        ? `${d.eligibilityPriority} Priority` : 'Standard';
+
+                if (d.collectionDate) {
+                    document.getElementById('aid-collection').textContent =
+                        new Date(d.collectionDate).toLocaleDateString('en-MY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                    document.getElementById('aid-collection').style.color = '#16a34a';
+                }
+
+                aidApprovedEl.style.display = 'block';
+
+            } catch (err) {
+                console.warn('Aid approval check:', err);
+                aidLoadingEl.style.display = 'none';
+                aidNotApprovedEl.style.display = 'block';
+            }
+        }
     </script>
 </body>
 
