@@ -179,7 +179,7 @@ function renderEligibilityRows(visible) {
             ? 'Not Eligible'
             : `${resident.eligibilityPriority} Priority`;
         const priorityBadge = `
-            <div style="display:inline-flex;align-items:center;gap:0.35rem;background:${ps.bg};color:${ps.color};padding:0.35rem 0.75rem;border-radius:999px;font-size:0.75rem;font-weight:700;">
+            <div style="display:inline-flex;align-items:center;gap:0.35rem;background:${ps.bg};color:${ps.color};padding:0.35rem 0.75rem;border-radius:999px;font-size:0.75rem;font-weight:700;white-space:nowrap;">
                 <i data-lucide="${ps.icon}" style="width:14px;height:14px;"></i> ${badgeLabel}
             </div>`;
 

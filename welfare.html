@@ -105,12 +105,12 @@
             </div>
         </div>
 
-        <!-- Alert Banner -->
-        <div class="welfare-alert-banner">
+        <!-- Alert Banner (dynamic) -->
+        <div class="welfare-alert-banner" id="alertBanner" style="display:none;">
             <i data-lucide="alert-circle" class="alert-circle-icon"></i>
             <div class="welfare-alert-content">
                 <h4>Action Required</h4>
-                <p>2 households are at high risk of poverty and require immediate attention.</p>
+                <p id="alertBannerText"></p>
             </div>
         </div>
 
@@ -198,7 +198,7 @@
                             <th>Per Capita</th>
                             <th>Dependents</th>
                             <th>Risk Level</th>
-                            <th>Trend</th>
+                            <th>Vulnerability</th>
                             <th>Priority Score</th>
                             <th>Aid Status</th>
                         </tr>
@@ -211,13 +211,30 @@
             <div id="welfarePagination"></div>
         </div>
 
+        <!-- Draft History Section -->
+        <div class="dashboard-card" style="margin-bottom: 2rem;">
+            <div class="card-title-area" style="margin-bottom: 1.25rem;">
+                <div>
+                    <h3>Welfare Draft History</h3>
+                    <p>All submitted AI drafts and their current approval status</p>
+                </div>
+            </div>
+            <div id="draftHistoryContainer">
+                <div style="text-align:center;color:#94a3b8;padding:2rem;">
+                    <i data-lucide="loader" class="spin"></i> Loading...
+                </div>
+            </div>
+        </div>
+
         <!-- Priority List Section -->
         <div class="dashboard-card" style="margin-bottom: 2rem;">
             <div class="card-title-area" style="margin-bottom: 1.5rem;">
-                <h3>Aid Distribution Priority List</h3>
-                <p>Households ranked by priority score for welfare assistance</p>
+                <div>
+                    <h3>Aid Distribution Priority List</h3>
+                    <p>Households ranked by priority score for welfare assistance</p>
+                </div>
+                <button id="togglePriorityBtn" style="background:none;border:1px solid #e2e8f0;border-radius:8px;padding:0.4rem 0.9rem;font-size:0.8rem;font-weight:600;color:#475569;cursor:pointer;">Show All</button>
             </div>
-            
             <div class="priority-list-wrapper" id="priorityListWrapper">
                 <div style="text-align: center; color: #94a3b8; padding: 2rem;">Loading priority list...</div>
             </div>

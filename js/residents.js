@@ -254,7 +254,7 @@ function renderTable(persons) {
         const eligibility = evaluateEligibility(p.household);
 
         const priorityBadge = eligibility.priority !== 'None'
-            ? `<span style="background-color: ${eligibility.bg}; color: ${eligibility.color}; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">${eligibility.priority}</span>`
+            ? `<span style="background-color: ${eligibility.bg}; color: ${eligibility.color}; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; white-space: nowrap;">${eligibility.priority}</span>`
             : `<span style="color: #94a3b8; font-size: 0.85rem;">-</span>`;
 
         const nameCell = p.isHead
