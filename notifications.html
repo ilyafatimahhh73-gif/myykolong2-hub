@@ -327,9 +327,11 @@
                         ? `${d.eligibilityPriority} Priority` : 'Standard';
 
                 if (d.collectionDate) {
-                    document.getElementById('aid-collection').textContent =
-                        new Date(d.collectionDate).toLocaleDateString('en-MY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-                    document.getElementById('aid-collection').style.color = '#16a34a';
+                    const [y, m, day] = d.collectionDate.split('-').map(Number);
+                    const dateStr = new Date(y, m - 1, day).toLocaleDateString('en-MY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                    const el = document.getElementById('aid-collection');
+                    el.innerHTML = `<i data-lucide="calendar-check" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>${dateStr}`;
+                    el.style.color = '#16a34a';
                 }
 
                 aidApprovedEl.style.display = 'block';

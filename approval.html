@@ -213,6 +213,17 @@
             </div>
             <div id="recipientsPagination"></div>
 
+            <!-- Collection Date Picker (shown before approval) -->
+            <div id="collectionDateSection" style="margin-top:1.75rem;padding:1.25rem 1.5rem;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.3rem;">
+                    <i data-lucide="calendar" style="width:16px;height:16px;color:#16a34a;"></i>
+                    <span style="font-size:0.85rem;font-weight:700;color:#15803d;">Aid Collection Date</span>
+                </div>
+                <p style="margin:0 0 0.75rem;font-size:0.8rem;color:#166534;">Set the date residents must come to collect their aid. This will be displayed on each resident's Notifications page.</p>
+                <input type="date" id="collectionDateInput"
+                    style="border:1px solid #86efac;border-radius:8px;padding:0.5rem 0.9rem;font-size:0.9rem;font-weight:600;color:#0f172a;background:white;width:220px;">
+            </div>
+
             <div class="btn-group">
                 <button class="btn btn-outline" id="rejectBtn" style="color: #ef4444; border-color: #fca5a5;">
                     <i data-lucide="x-circle"></i> Reject (Require Recalculation)

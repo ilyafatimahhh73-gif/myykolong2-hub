@@ -126,6 +126,11 @@ function openDraftDetails(draftId, data) {
         approveBtn.title = "Cannot approve a draft containing incomplete profiles.";
     }
 
+    // Reset collection date; enforce minimum = today
+    const dateInput = document.getElementById('collectionDateInput');
+    dateInput.value = '';
+    dateInput.min = new Date().toISOString().split('T')[0];
+
     detailsView.classList.add('active');
 
     // Smooth scroll to details
@@ -192,12 +197,26 @@ function closeDetails() {
 async function updateDraftStatus(newStatus) {
     if (!currentDraftId) return;
 
+    // Validate collection date when approving
+    let collectionDate = null;
+    if (newStatus === 'Confirmed') {
+        const dateInput = document.getElementById('collectionDateInput');
+        if (!dateInput.value) {
+            alert('Please set an Aid Collection Date before approving this draft.');
+            dateInput.focus();
+            return;
+        }
+        collectionDate = dateInput.value; // "YYYY-MM-DD"
+    }
+
     try {
         const approvedAt = new Date().toISOString();
 
-        // Update draft status
+        // Update draft status (include collectionDate on approval so distributions tab can read it)
         const docRef = doc(db, "welfareDrafts", currentDraftId);
-        await updateDoc(docRef, { status: newStatus, updatedAt: approvedAt });
+        const draftUpdate = { status: newStatus, updatedAt: approvedAt };
+        if (collectionDate) draftUpdate.collectionDate = collectionDate;
+        await updateDoc(docRef, draftUpdate);
 
         // On approval: write one approvedResidents/{ic} doc per eligible recipient
         if (newStatus === 'Confirmed' && currentDraftData) {
@@ -216,6 +235,7 @@ async function updateDraftStatus(newStatus) {
                         eligibilityPriority: r.eligibilityPriority || 'Medium',
                         xaiLog: r.xaiLog || null,
                         approvedAt,
+                        collectionDate,
                         draftId: currentDraftId
                     });
                 });

@@ -112,12 +112,20 @@
         <section class="transparency-kpi-grid">
             <div class="kpi-card-transparent">
                 <div>
-                    <div class="kpi-value text-dark" style="font-size: 1.75rem; margin-bottom: 0.25rem;">3</div>
-                    <div class="mini-kpi-label">Decisions Explained</div>
+                    <div class="kpi-value text-dark" id="kpi-approved" style="font-size: 1.75rem; margin-bottom: 0.25rem;">—</div>
+                    <div class="mini-kpi-label">Residents Approved</div>
                 </div>
-                <i data-lucide="file-text" class="icon-blue"></i>
+                <i data-lucide="users" class="icon-blue"></i>
             </div>
-            
+
+            <div class="kpi-card-transparent">
+                <div>
+                    <div class="kpi-value text-dark" id="kpi-distributions" style="font-size: 1.75rem; margin-bottom: 0.25rem;">—</div>
+                    <div class="mini-kpi-label">Distributions Confirmed</div>
+                </div>
+                <i data-lucide="file-check" class="icon-green"></i>
+            </div>
+
             <div class="kpi-card-transparent">
                 <div>
                     <div class="kpi-value text-dark-green" style="font-size: 1.75rem; color: #10b981; margin-bottom: 0.25rem;">100%</div>
@@ -125,7 +133,7 @@
                 </div>
                 <i data-lucide="check-circle" class="icon-green"></i>
             </div>
-            
+
             <div class="kpi-card-transparent">
                 <div>
                     <div class="kpi-value text-dark" style="font-size: 1.75rem; color: #a855f7; margin-bottom: 0.25rem;">4</div>
@@ -137,122 +145,40 @@
 
         <!-- Tabs -->
         <div class="admin-tabs-nav">
-            <button class="tab-btn active" data-tab="tab-decisions">Decision Explanations</button>
+            <button class="tab-btn active" data-tab="tab-distributions">Aid Distributions</button>
+            <button class="tab-btn" data-tab="tab-decisions">Decision Records</button>
             <button class="tab-btn" data-tab="tab-criteria">Classification Criteria</button>
             <button class="tab-btn" data-tab="tab-faqs">Frequently Asked Questions</button>
         </div>
 
-        <!-- Tab 1: Decisions -->
-        <section id="tab-decisions" class="tab-content active">
+        <!-- Tab 1: Aid Distributions -->
+        <section id="tab-distributions" class="tab-content active">
             <div class="dashboard-card" style="margin-bottom: 2rem;">
                 <div class="card-title-area" style="margin-bottom: 1.25rem;">
-                    <h3>Welfare Decision Explanations</h3>
-                    <p>See how each household's welfare status was determined</p>
+                    <h3>Confirmed Aid Distributions</h3>
+                    <p>Full history of welfare distributions approved by the Ketua Kampung</p>
+                </div>
+                <div id="distributionsList">
+                    <div style="text-align:center;color:#94a3b8;padding:2rem;">
+                        <i data-lucide="loader" class="spin"></i> Loading distributions...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 2: Decision Records -->
+        <section id="tab-decisions" class="tab-content">
+            <div class="dashboard-card" style="margin-bottom: 2rem;">
+                <div class="card-title-area" style="margin-bottom: 1.25rem;">
+                    <h3>Welfare Decision Records</h3>
+                    <p>AI-generated eligibility decisions for every approved recipient — IC numbers are partially masked for privacy</p>
                 </div>
 
                 <input type="text" id="searchInput" class="transparency-search" placeholder="Search by name or IC number...">
 
                 <div class="decision-list" id="decisionList">
-                    <!-- Card 1 -->
-                    <div class="decision-card">
-                        <div class="decision-header">
-                            <div class="decision-title-area">
-                                <h4>Ahmad bin Abdullah</h4>
-                                <span class="approval-badge high" style="background-color: #fee2e2; color: #ef4444; border-radius: 4px; font-size: 0.70rem;">B40</span>
-                            </div>
-                            <button class="btn-icon-text"><i data-lucide="eye"></i> View Details</button>
-                        </div>
-                        <div class="decision-meta">
-                            <div class="meta-row">IC: 850123-10-5678</div>
-                            <div class="meta-row result">Eligible for Aid - Priority Level: High</div>
-                            <div class="meta-row" style="font-size: 0.8rem;">Decision Date: 3/5/2026</div>
-                        </div>
-                        <div class="decision-grid">
-                            <div class="dg-item">
-                                <span class="dg-label">Household Income</span>
-                                <span class="dg-value">RM 2,800</span>
-                            </div>
-                            <div class="dg-item">
-                                <span class="dg-label">Number of Dependents</span>
-                                <span class="dg-value">4</span>
-                            </div>
-                            <div class="dg-item">
-                                <span class="dg-label">Per Capita Income</span>
-                                <span class="dg-value">RM 560</span>
-                            </div>
-                            <div class="dg-item">
-                                <span class="dg-label">Vulnerabilities</span>
-                                <span class="dg-value">Elderly Member</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card 2 -->
-                    <div class="decision-card">
-                        <div class="decision-header">
-                            <div class="decision-title-area">
-                                <h4>Siti Aminah binti Hassan</h4>
-                                <span class="approval-badge medium" style="background-color: #fef3c7; color: #d97706; border-radius: 4px; font-size: 0.70rem;">M40</span>
-                            </div>
-                            <button class="btn-icon-text"><i data-lucide="eye"></i> View Details</button>
-                        </div>
-                        <div class="decision-meta">
-                            <div class="meta-row">IC: 780515-08-2345</div>
-                            <div class="meta-row result" style="font-weight: 600;">Not Eligible for Aid - Stable Economic Status</div>
-                            <div class="meta-row" style="font-size: 0.8rem;">Decision Date: 3/6/2026</div>
-                        </div>
-                        <div class="decision-grid">
-                            <div class="dg-item">
-                                <span class="dg-label">Household Income</span>
-                                <span class="dg-value">RM 5,200</span>
-                            </div>
-                            <div class="dg-item">
-                                <span class="dg-label">Number of Dependents</span>
-                                <span class="dg-value">2</span>
-                            </div>
-                            <div class="dg-item">
-                                <span class="dg-label">Per Capita Income</span>
-                                <span class="dg-value">RM 1,733</span>
-                            </div>
-                            <div class="dg-item">
-                                <span class="dg-label">Vulnerabilities</span>
-                                <span class="dg-value">None</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card 3 -->
-                    <div class="decision-card">
-                        <div class="decision-header">
-                            <div class="decision-title-area">
-                                <h4>Fatimah binti Ibrahim</h4>
-                                <span class="approval-badge high" style="background-color: #fee2e2; color: #ef4444; border-radius: 4px; font-size: 0.70rem;">B40</span>
-                            </div>
-                            <button class="btn-icon-text"><i data-lucide="eye"></i> View Details</button>
-                        </div>
-                        <div class="decision-meta">
-                            <div class="meta-row">IC: 881127-05-6789</div>
-                            <div class="meta-row result">Eligible for Aid - Priority Level: Very High</div>
-                            <div class="meta-row" style="font-size: 0.8rem;">Decision Date: 3/6/2026</div>
-                        </div>
-                        <div class="decision-grid">
-                            <div class="dg-item">
-                                <span class="dg-label">Household Income</span>
-                                <span class="dg-value">RM 1,900</span>
-                            </div>
-                            <div class="dg-item">
-                                <span class="dg-label">Number of Dependents</span>
-                                <span class="dg-value">5</span>
-                            </div>
-                            <div class="dg-item">
-                                <span class="dg-label">Per Capita Income</span>
-                                <span class="dg-value">RM 317</span>
-                            </div>
-                            <div class="dg-item">
-                                <span class="dg-label">Vulnerabilities</span>
-                                <span class="dg-value">None</span>
-                            </div>
-                        </div>
+                    <div style="text-align:center;color:#94a3b8;padding:2rem;">
+                        <i data-lucide="loader" class="spin"></i> Loading records...
                     </div>
                 </div>
             </div>
@@ -416,175 +342,7 @@
         </footer>
     </main>
 
-    <!-- View Resident Modal (Reused from residents.html) -->
-    <link rel="stylesheet" href="css/modals.css">
-    <div class="modal-overlay" id="viewResidentModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div>
-                    <h2>Resident Details</h2>
-                    <p id="viewModalSub">Complete information for [Name]</p>
-                </div>
-                <button class="close-modal-btn bordered-close" id="closeViewResidentModal"><i data-lucide="x"></i></button>
-            </div>
-            
-            <div class="modal-details-grid">
-                <div class="detail-group">
-                    <span class="detail-label">Full Name</span>
-                    <span class="detail-value" id="mdl-name">-</span>
-                </div>
-                <div class="detail-group">
-                    <span class="detail-label">IC Number</span>
-                    <span class="detail-value" id="mdl-ic">-</span>
-                </div>
-                <div class="detail-group">
-                    <span class="detail-label">Age</span>
-                    <span class="detail-value" id="mdl-age">39 (Estimated)</span>
-                </div>
-                <div class="detail-group">
-                    <span class="detail-label">Gender</span>
-                    <span class="detail-value">Not specified</span>
-                </div>
-                <div class="detail-group">
-                    <span class="detail-label">Household Income</span>
-                    <span class="detail-value" id="mdl-income">-</span>
-                </div>
-                <div class="detail-group">
-                    <span class="detail-label">Dependents</span>
-                    <span class="detail-value" id="mdl-dep">-</span>
-                </div>
-                <div class="detail-group border-fix">
-                    <span class="detail-label">Category</span>
-                    <span class="detail-value" id="mdl-cat">-</span>
-                </div>
-                <div class="detail-group">
-                    <span class="detail-label">Phone</span>
-                    <span class="detail-value">Not specified</span>
-                </div>
-                <div class="detail-group full-width">
-                    <span class="detail-label">Address</span>
-                    <span class="detail-value">Village Residence</span>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <script type="module">
-        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-        import { db } from "./js/firebase-config.js";
-        import { requireAuth, setupLogoutButton, updateUserDisplay } from "./js/auth.js";
-        import { applyNavVisibility, applyCachedNavVisibility, cacheNavRole } from "./js/authGuard.js";
-
-        // Apply the last-known role's nav filter immediately, before the
-        // role lookup below resolves, so the navbar is already correct on first paint.
-        applyCachedNavVisibility();
-
-        try {
-            lucide.createIcons();
-        } catch (e) {
-            console.warn("Lucide icons failed to load:", e);
-        }
-
-        // Protect this page
-        const user = await requireAuth();
-        updateUserDisplay(user);
-        setupLogoutButton();
-
-        // Hide nav tabs the user's role isn't allowed to open
-        const userSnap = await getDoc(doc(db, "users", user.uid));
-        const role = userSnap.exists() ? userSnap.data().role : null;
-        cacheNavRole(role);
-        applyNavVisibility(role);
-
-        // Tab Switching Logic
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const targetId = btn.getAttribute('data-tab');
-                
-                // Update buttons
-                tabBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                // Update contents
-                tabContents.forEach(c => c.classList.remove('active'));
-                document.getElementById(targetId).classList.add('active');
-            });
-        });
-
-        // FAQ Accordion Logic
-        const faqHeaders = document.querySelectorAll('.faq-header');
-        faqHeaders.forEach(header => {
-            header.addEventListener('click', () => {
-                const item = header.parentElement;
-                
-                // Optional: Close all other accordions first
-                // document.querySelectorAll('.faq-item').forEach(i => {
-                //     if(i !== item) i.classList.remove('active');
-                // });
-
-                item.classList.toggle('active');
-            });
-        });
-
-        // Search Filter Logic
-        const searchInput = document.getElementById('searchInput');
-        const decisionCards = document.querySelectorAll('.decision-card');
-
-        searchInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            
-            decisionCards.forEach(card => {
-                const name = card.querySelector('.decision-title-area h4').innerText.toLowerCase();
-                const icRow = card.querySelector('.meta-row').innerText.toLowerCase(); // grabs the IC row
-                
-                if (name.includes(term) || icRow.includes(term)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
-
-        // View Details Modal Logic
-        const viewModal = document.getElementById('viewResidentModal');
-        const closeViewBtn = document.getElementById('closeViewResidentModal');
-        const viewBtns = document.querySelectorAll('.decision-header .btn-icon-text');
-
-        viewBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                // Find parent card to scrape data
-                const card = e.currentTarget.closest('.decision-card');
-                
-                // Scrape values
-                const nameStr = card.querySelector('h4').innerText;
-                const badgeHtml = card.querySelector('.approval-badge').outerHTML;
-                const icStr = card.querySelector('.meta-row').innerText.replace('IC: ', '');
-                
-                const gridItems = card.querySelectorAll('.dg-value');
-                const incomeStr = gridItems[0].innerText;
-                const depStr = gridItems[1].innerText;
-
-                // Populate Modal
-                document.getElementById('viewModalSub').innerText = 'Complete information for ' + nameStr;
-                document.getElementById('mdl-name').innerText = nameStr;
-                document.getElementById('mdl-ic').innerText = icStr;
-                document.getElementById('mdl-income').innerText = incomeStr;
-                document.getElementById('mdl-dep').innerText = depStr;
-                document.getElementById('mdl-cat').innerHTML = badgeHtml;
-
-                // Open Modal
-                viewModal.classList.add('active');
-            });
-        });
-
-        closeViewBtn.addEventListener('click', () => viewModal.classList.remove('active'));
-        
-        window.addEventListener('click', (e) => {
-            if (e.target === viewModal) viewModal.classList.remove('active');
-        });
-    </script>
+<script type="module" src="./js/transparency.js"></script>
 </body>
 </html>
