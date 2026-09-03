@@ -11,11 +11,38 @@
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF + AutoTable (PDF export) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <!-- SheetJS (Excel export) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/analytics.css">
+    <style>
+        .export-check-row {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.35rem 0.1rem;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 0.83rem;
+            font-weight: 500;
+            color: #0f172a;
+            user-select: none;
+        }
+        .export-check-row:hover { background: #f8fafc; }
+        .export-check-row input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            accent-color: #3b82f6;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+    </style>
 </head>
 
 <body class="dashboard-body">
@@ -86,9 +113,50 @@
     <!-- Main Content Area -->
     <main class="dashboard-container">
         <!-- Header -->
-        <header class="dashboard-header">
-            <h1>Analytics Dashboard</h1>
-            <p>Visual insights into poverty trends and community welfare</p>
+        <header class="dashboard-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+            <div>
+                <h1>Analytics Dashboard</h1>
+                <p>Visual insights into poverty trends and community welfare</p>
+            </div>
+            <!-- Export Dropdown (Setiausaha only — hidden for KK by JS) -->
+            <div id="exportDropdownWrapper" style="position:relative;display:none;">
+                <button id="exportToggle" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.6rem 1.1rem;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;font-weight:600;font-size:0.875rem;color:#0f172a;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:border-color .15s,box-shadow .15s;" onmouseover="this.style.borderColor='#3b82f6';this.style.boxShadow='0 2px 8px rgba(59,130,246,0.15)'" onmouseout="this.style.borderColor='#e2e8f0';this.style.boxShadow='0 1px 4px rgba(0,0,0,0.06)'">
+                    <i data-lucide="download" style="width:16px;height:16px;color:#3b82f6;"></i>
+                    Export Report
+                    <i data-lucide="chevron-down" id="exportChevron" style="width:14px;height:14px;color:#94a3b8;transition:transform .2s;"></i>
+                </button>
+                <div id="exportMenu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);width:272px;background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,0.13);z-index:200;overflow:hidden;">
+                    <!-- Section picker header -->
+                    <div style="padding:0.85rem 1rem 0.5rem;border-bottom:1px solid #f1f5f9;">
+                        <div style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:0.6rem;">Sections to include</div>
+                        <label class="export-check-row"><input type="checkbox" id="chk-kpi"   checked> <span>Village Income Snapshot</span></label>
+                        <label class="export-check-row"><input type="checkbox" id="chk-dist"  checked> <span>Income Distribution</span></label>
+                        <label class="export-check-row"><input type="checkbox" id="chk-risk"  checked> <span>At-Risk Families</span></label>
+                        <label class="export-check-row"><input type="checkbox" id="chk-all"   checked> <span>Complete Household Register</span></label>
+                    </div>
+                    <!-- Export buttons -->
+                    <div style="padding:0.6rem;">
+                        <button id="exportPdfBtn" style="width:100%;display:flex;align-items:center;gap:0.75rem;padding:0.7rem 0.9rem;border:none;background:none;border-radius:8px;cursor:pointer;text-align:left;transition:background .15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
+                            <div style="width:34px;height:34px;background:#fee2e2;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i data-lucide="file-text" style="width:15px;height:15px;color:#ef4444;"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:700;font-size:0.84rem;color:#0f172a;">Export as PDF</div>
+                                <div style="font-size:0.73rem;color:#64748b;">Formatted printable report</div>
+                            </div>
+                        </button>
+                        <button id="exportExcelBtn" style="width:100%;display:flex;align-items:center;gap:0.75rem;padding:0.7rem 0.9rem;border:none;background:none;border-radius:8px;cursor:pointer;text-align:left;transition:background .15s;" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='none'">
+                            <div style="width:34px;height:34px;background:#dcfce7;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i data-lucide="table-2" style="width:15px;height:15px;color:#16a34a;"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:700;font-size:0.84rem;color:#0f172a;">Export as Excel</div>
+                                <div style="font-size:0.73rem;color:#64748b;">Multi-sheet spreadsheet</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </header>
 
         <!-- KPI Cards Row -->

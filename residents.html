@@ -13,11 +13,36 @@
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
     <!-- SheetJS for Excel Import/Export -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF + AutoTable (PDF export) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/tables.css">
     <link rel="stylesheet" href="css/modals.css">
+    <style>
+        .export-check-row {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.35rem 0.1rem;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 0.83rem;
+            font-weight: 500;
+            color: #0f172a;
+            user-select: none;
+        }
+        .export-check-row:hover { background: #f8fafc; }
+        .export-check-row input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            accent-color: #3b82f6;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+    </style>
 </head>
 
 <body class="dashboard-body">
@@ -124,9 +149,42 @@
                     <p>Complete list of registered residents with demographic data</p>
                 </div>
                 <div class="table-actions">
-                    <button class="btn btn-outline btn-sm" id="exportBtn">
-                        <i data-lucide="upload"></i> Export
-                    </button>
+                    <!-- Export dropdown -->
+                    <div id="resExportWrapper" style="position:relative;">
+                        <button id="resExportToggle" class="btn btn-outline btn-sm" style="display:inline-flex;align-items:center;gap:0.4rem;">
+                            <i data-lucide="upload" style="width:14px;height:14px;"></i> Export
+                            <i data-lucide="chevron-down" id="resExportChevron" style="width:13px;height:13px;color:#94a3b8;transition:transform .2s;"></i>
+                        </button>
+                        <div id="resExportMenu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);width:260px;background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,0.13);z-index:200;overflow:hidden;">
+                            <div style="padding:0.85rem 1rem 0.5rem;border-bottom:1px solid #f1f5f9;">
+                                <div style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:0.6rem;">Sections to include</div>
+                                <label class="export-check-row"><input type="checkbox" id="rchk-summary" checked> <span>Village Summary (KPIs)</span></label>
+                                <label class="export-check-row"><input type="checkbox" id="rchk-all"     checked> <span>All Individuals</span></label>
+                                <label class="export-check-row"><input type="checkbox" id="rchk-hh"      checked> <span>Household Register</span></label>
+                                <label class="export-check-row"><input type="checkbox" id="rchk-risk"    checked> <span>At-Risk Families</span></label>
+                            </div>
+                            <div style="padding:0.6rem;">
+                                <button id="resExportPdfBtn" style="width:100%;display:flex;align-items:center;gap:0.75rem;padding:0.7rem 0.9rem;border:none;background:none;border-radius:8px;cursor:pointer;text-align:left;transition:background .15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
+                                    <div style="width:34px;height:34px;background:#fee2e2;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                        <i data-lucide="file-text" style="width:15px;height:15px;color:#ef4444;"></i>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight:700;font-size:0.84rem;color:#0f172a;">Export as PDF</div>
+                                        <div style="font-size:0.73rem;color:#64748b;">Formatted printable report</div>
+                                    </div>
+                                </button>
+                                <button id="resExportExcelBtn" style="width:100%;display:flex;align-items:center;gap:0.75rem;padding:0.7rem 0.9rem;border:none;background:none;border-radius:8px;cursor:pointer;text-align:left;transition:background .15s;" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='none'">
+                                    <div style="width:34px;height:34px;background:#dcfce7;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                        <i data-lucide="table-2" style="width:15px;height:15px;color:#16a34a;"></i>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight:700;font-size:0.84rem;color:#0f172a;">Export as Excel</div>
+                                        <div style="font-size:0.73rem;color:#64748b;">Multi-sheet spreadsheet</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <button class="btn btn-outline btn-sm" id="importBtn">
                         <i data-lucide="download"></i> Import
                     </button>

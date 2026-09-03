@@ -1120,39 +1120,292 @@ function mapFlatRow(row) {
 }
 
 
-// ============ EXCEL EXPORT ============
+// ============ EXPORT DROPDOWN ============
 
-const exportBtn = document.getElementById('exportBtn');
+const resExportWrapper  = document.getElementById('resExportWrapper');
+const resExportToggle   = document.getElementById('resExportToggle');
+const resExportMenu     = document.getElementById('resExportMenu');
+const resExportChevron  = document.getElementById('resExportChevron');
 
-exportBtn.addEventListener('click', () => {
-    if (allResidents.length === 0) {
-        alert('No residents to export.');
-        return;
+if (resExportToggle) {
+    resExportToggle.addEventListener('click', () => {
+        const open = resExportMenu.style.display === 'block';
+        resExportMenu.style.display = open ? 'none' : 'block';
+        if (resExportChevron) resExportChevron.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+    });
+    document.addEventListener('click', (e) => {
+        if (resExportWrapper && resExportWrapper.contains(e.target)) return;
+        if (resExportMenu) resExportMenu.style.display = 'none';
+        if (resExportChevron) resExportChevron.style.transform = 'rotate(0deg)';
+    });
+    document.getElementById('resExportPdfBtn').addEventListener('click', exportResidentsToPDF);
+    document.getElementById('resExportExcelBtn').addEventListener('click', exportResidentsToExcel);
+}
+
+function getResExportSections() {
+    return {
+        summary: document.getElementById('rchk-summary')?.checked ?? true,
+        all:     document.getElementById('rchk-all')?.checked     ?? true,
+        hh:      document.getElementById('rchk-hh')?.checked      ?? true,
+        risk:    document.getElementById('rchk-risk')?.checked     ?? true,
+    };
+}
+
+function buildResidentReportData() {
+    const flat = flattenResidents(allResidents);
+    let b40 = 0, m40 = 0, t20 = 0, totalPeople = 0;
+    const atRisk = [];
+
+    allResidents.forEach(r => {
+        totalPeople += 1 + (r.familyMembers ? r.familyMembers.length : 0);
+        const inc = getHouseholdIncome(r);
+        const dep = parseInt(r.dependents) || 0;
+        const pc  = dep > 0 ? inc / (dep + 1) : inc;
+        const cat = classifyIncome(inc);
+        if (cat === 'B40') b40++;
+        else if (cat === 'M40') m40++;
+        else t20++;
+        if (cat === 'B40' && (pc <= 800 || dep >= 4)) {
+            atRisk.push({ ...r, _income: inc, _perCapita: pc, _dep: dep });
+        }
+    });
+    atRisk.sort((a, b) => a._perCapita - b._perCapita);
+    return { flat, totalPeople, b40, m40, t20, atRisk, totalHH: allResidents.length };
+}
+
+// ── PDF Export ────────────────────────────────────────────────────────────────
+function exportResidentsToPDF() {
+    if (allResidents.length === 0) { alert('No residents to export.'); return; }
+    const sections = getResExportSections();
+    if (!sections.summary && !sections.all && !sections.hh && !sections.risk) {
+        alert('Please select at least one section to export.'); return;
     }
 
-    // Prepare data for export
-    const exportData = allResidents.map(r => ({
-        'Name': r.name,
-        'IC Number': r.ic,
-        'Age': resolveAge(r.ic, r.age),
-        'Gender': r.gender ? r.gender.charAt(0).toUpperCase() + r.gender.slice(1) : '',
-        'Income (RM)': r.income,
-        'Dependents': r.dependents,
-        'Category': classifyIncome(r.income),
-        'Priority': evaluateEligibility(r).priority,
-        'Address': r.address || '',
-        'Phone': r.phone || ''
-    }));
+    const { jsPDF } = window.jspdf;
+    const doc  = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 14;
+    const now  = new Date().toLocaleString('en-MY', { dateStyle: 'long', timeStyle: 'short' });
+    const NAVY  = [15, 23, 42];
+    const BLUE  = [59, 130, 246];
+    const LIGHT = [248, 250, 252];
 
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Residents');
+    // Header bar
+    doc.setFillColor(...NAVY);
+    doc.rect(0, 0, pageW, 38, 'F');
+    doc.setFillColor(...BLUE);
+    doc.circle(margin + 6, 19, 6, 'F');
+    doc.setFontSize(7).setTextColor(180, 200, 230).setFont('helvetica', 'normal');
+    doc.text('MYKOLONG2 HUB', margin + 14, 16);
+    doc.setFontSize(14).setTextColor(255, 255, 255).setFont('helvetica', 'bold');
+    doc.text('Resident Database Report', margin + 14, 24);
+    doc.setFontSize(8).setTextColor(180, 200, 230).setFont('helvetica', 'normal');
+    doc.text(`Generated: ${now}`, margin + 14, 31);
+    doc.text('CONFIDENTIAL — FOR OFFICIAL USE ONLY', pageW - margin, 31, { align: 'right' });
 
-    // Auto-fit column widths
-    const colWidths = Object.keys(exportData[0]).map(key => ({
-        wch: Math.max(key.length, ...exportData.map(r => String(r[key]).length)) + 2
-    }));
-    ws['!cols'] = colWidths;
+    let y = 48;
 
-    XLSX.writeFile(wb, 'MyKolong2_Residents_' + new Date().toISOString().slice(0, 10) + '.xlsx');
-});
+    function section(title, subtitle) {
+        if (y > pageH - 50) { doc.addPage(); y = 20; }
+        doc.setFillColor(...BLUE);
+        doc.rect(margin, y, 2, 5, 'F');
+        doc.setFontSize(11).setTextColor(...NAVY).setFont('helvetica', 'bold');
+        doc.text(title, margin + 5, y + 4);
+        if (subtitle) {
+            doc.setFontSize(8).setTextColor(100, 116, 139).setFont('helvetica', 'normal');
+            doc.text(subtitle, margin + 5, y + 9);
+            y += 14;
+        } else { y += 10; }
+    }
+
+    const rd = buildResidentReportData();
+
+    // 1. Village Summary
+    if (sections.summary) {
+        section('Village Summary', `${rd.totalHH} households · ${rd.totalPeople} individuals`);
+        doc.autoTable({
+            startY: y,
+            head: [['Metric', 'Value']],
+            body: [
+                ['Total Individuals',              rd.totalPeople],
+                ['Total Households',               rd.totalHH],
+                ['B40 – Low Income Households',    rd.b40],
+                ['M40 – Middle Income Households', rd.m40],
+                ['T20 – High Income Households',   rd.t20],
+                ['At-Risk Families',               rd.atRisk.length],
+            ],
+            styles: { font: 'helvetica', fontSize: 9, cellPadding: 4 },
+            headStyles: { fillColor: NAVY, textColor: 255, fontStyle: 'bold' },
+            alternateRowStyles: { fillColor: LIGHT },
+            columnStyles: { 0: { fontStyle: 'bold', cellWidth: 100 }, 1: { halign: 'center' } },
+            margin: { left: margin, right: margin },
+        });
+        y = doc.lastAutoTable.finalY + 10;
+    }
+
+    // 2. All Individuals
+    if (sections.all) {
+        if (y > pageH - 60) { doc.addPage(); y = 20; }
+        section('All Individuals', `${rd.flat.length} people (head + family members)`);
+        doc.autoTable({
+            startY: y,
+            head: [['#', 'Name', 'IC / MyKad', 'Role', 'Age', 'Hh. Income', 'Bracket']],
+            body: rd.flat.map((p, i) => {
+                const cat = classifyIncome(p.householdIncome);
+                return [i + 1, p.name || '—', p.ic || '—', p.relationship, p.age || '—',
+                    `RM ${p.householdIncome.toLocaleString()}`, cat];
+            }),
+            styles: { font: 'helvetica', fontSize: 7.5, cellPadding: 2.5 },
+            headStyles: { fillColor: NAVY, textColor: 255, fontStyle: 'bold', fontSize: 8 },
+            alternateRowStyles: { fillColor: LIGHT },
+            columnStyles: { 0: { cellWidth: 14, halign: 'center' }, 2: { font: 'courier', fontSize: 7 }, 5: { halign: 'right' } },
+            margin: { left: margin, right: margin },
+        });
+        y = doc.lastAutoTable.finalY + 10;
+    }
+
+    // 3. Household Register
+    if (sections.hh) {
+        if (y > pageH - 60) { doc.addPage(); y = 20; }
+        section('Household Register', `Head of household — ${rd.totalHH} households`);
+        doc.autoTable({
+            startY: y,
+            head: [['#', 'Name (Head)', 'IC / MyKad', 'Hh. Income', 'Members', 'Bracket', 'OKU']],
+            body: allResidents.map((r, i) => {
+                const inc = getHouseholdIncome(r);
+                const cat = classifyIncome(inc);
+                return [i + 1, r.name || '—', r.ic || '—', `RM ${inc.toLocaleString()}`,
+                    1 + (r.familyMembers ? r.familyMembers.length : 0), cat, r.oku === 'Ya' ? 'Yes' : 'No'];
+            }),
+            styles: { font: 'helvetica', fontSize: 7.5, cellPadding: 2.5 },
+            headStyles: { fillColor: NAVY, textColor: 255, fontStyle: 'bold', fontSize: 8 },
+            alternateRowStyles: { fillColor: LIGHT },
+            columnStyles: { 0: { cellWidth: 14, halign: 'center' }, 2: { font: 'courier', fontSize: 7 }, 3: { halign: 'right' }, 4: { halign: 'center' }, 6: { halign: 'center' } },
+            margin: { left: margin, right: margin },
+        });
+        y = doc.lastAutoTable.finalY + 10;
+    }
+
+    // 4. At-Risk Families
+    if (sections.risk) {
+        if (y > pageH - 60) { doc.addPage(); y = 20; }
+        section('At-Risk Families', 'B40 households with per capita < RM 800 or 4+ dependents');
+        if (rd.atRisk.length === 0) {
+            doc.setFontSize(9).setTextColor(34, 197, 94).setFont('helvetica', 'italic');
+            doc.text('No at-risk families detected.', margin, y + 5);
+            y += 14;
+        } else {
+            doc.autoTable({
+                startY: y,
+                head: [['Name', 'IC / MyKad', 'Hh. Income', 'Per Capita', 'Dependents']],
+                body: rd.atRisk.map(r => [
+                    r.name || '—', r.ic || '—',
+                    `RM ${r._income.toLocaleString()}`,
+                    `RM ${r._perCapita.toFixed(0)}`,
+                    r._dep
+                ]),
+                styles: { font: 'helvetica', fontSize: 8.5, cellPadding: 3.5 },
+                headStyles: { fillColor: [239, 68, 68], textColor: 255, fontStyle: 'bold', fontSize: 9 },
+                alternateRowStyles: { fillColor: [255, 241, 242] },
+                margin: { left: margin, right: margin },
+            });
+        }
+    }
+
+    // Page footer
+    const pages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pages; i++) {
+        doc.setPage(i);
+        doc.setDrawColor(226, 232, 240);
+        doc.line(margin, pageH - 12, pageW - margin, pageH - 12);
+        doc.setFontSize(7).setTextColor(148, 163, 184).setFont('helvetica', 'normal');
+        doc.text('MyKolong2 Hub — Village Management System', margin, pageH - 7);
+        doc.text(`Page ${i} of ${pages}`, pageW - margin, pageH - 7, { align: 'right' });
+    }
+
+    doc.save(`MyKolong2_Residents_${new Date().toISOString().slice(0, 10)}.pdf`);
+}
+
+// ── Excel Export ──────────────────────────────────────────────────────────────
+function exportResidentsToExcel() {
+    if (allResidents.length === 0) { alert('No residents to export.'); return; }
+    const sections = getResExportSections();
+    if (!sections.summary && !sections.all && !sections.hh && !sections.risk) {
+        alert('Please select at least one section to export.'); return;
+    }
+
+    const wb  = XLSX.utils.book_new();
+    const rd  = buildResidentReportData();
+    const dateTag = new Date().toISOString().slice(0, 10);
+
+    if (sections.summary) {
+        const ws = XLSX.utils.aoa_to_sheet([
+            ['MyKolong2 Hub — Resident Database Report'],
+            [`Generated: ${new Date().toLocaleString('en-MY')}`],
+            [],
+            ['Metric', 'Value'],
+            ['Total Individuals',              rd.totalPeople],
+            ['Total Households',               rd.totalHH],
+            ['B40 – Low Income Households',    rd.b40],
+            ['M40 – Middle Income Households', rd.m40],
+            ['T20 – High Income Households',   rd.t20],
+            ['At-Risk Families',               rd.atRisk.length],
+        ]);
+        ws['!cols'] = [{ wch: 36 }, { wch: 14 }];
+        XLSX.utils.book_append_sheet(wb, ws, 'Summary');
+    }
+
+    if (sections.all) {
+        const rows = [
+            ['#', 'Name', 'IC / MyKad', 'Role', 'Age', 'Gender', 'Household Income (RM)', 'Bracket', 'OKU'],
+            ...rd.flat.map((p, i) => [
+                i + 1, p.name || '—', p.ic || '—', p.relationship,
+                p.age || '—', p.gender || '—',
+                p.householdIncome,
+                classifyIncome(p.householdIncome),
+                p.oku === 'Ya' ? 'Yes' : 'No'
+            ])
+        ];
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = [{ wch: 4 }, { wch: 24 }, { wch: 18 }, { wch: 20 }, { wch: 6 }, { wch: 10 }, { wch: 22 }, { wch: 10 }, { wch: 6 }];
+        XLSX.utils.book_append_sheet(wb, ws, 'All Individuals');
+    }
+
+    if (sections.hh) {
+        const rows = [
+            ['#', 'Name (Head)', 'IC / MyKad', 'Household Income (RM)', 'Family Size', 'Bracket', 'OKU', 'Address', 'Phone'],
+            ...allResidents.map((r, i) => {
+                const inc = getHouseholdIncome(r);
+                return [
+                    i + 1, r.name || '—', r.ic || '—', inc,
+                    1 + (r.familyMembers ? r.familyMembers.length : 0),
+                    classifyIncome(inc),
+                    r.oku === 'Ya' ? 'Yes' : 'No',
+                    r.address || '—', r.phone || '—'
+                ];
+            })
+        ];
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = [{ wch: 4 }, { wch: 24 }, { wch: 18 }, { wch: 22 }, { wch: 12 }, { wch: 10 }, { wch: 6 }, { wch: 30 }, { wch: 14 }];
+        XLSX.utils.book_append_sheet(wb, ws, 'Household Register');
+    }
+
+    if (sections.risk) {
+        const rows = [
+            ['Name', 'IC / MyKad', 'Household Income (RM)', 'Per Capita (RM)', 'Dependents', 'Risk Factors'],
+            ...rd.atRisk.map(r => {
+                const factors = [];
+                if (r._perCapita <= 800) factors.push(`Low per capita (RM ${r._perCapita.toFixed(0)})`);
+                if (r._dep >= 4) factors.push(`High dependents (${r._dep})`);
+                if (r.oku === 'Ya') factors.push('OKU member');
+                return [r.name || '—', r.ic || '—', r._income, parseFloat(r._perCapita.toFixed(0)), r._dep, factors.join('; ')];
+            })
+        ];
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = [{ wch: 24 }, { wch: 18 }, { wch: 22 }, { wch: 16 }, { wch: 12 }, { wch: 40 }];
+        XLSX.utils.book_append_sheet(wb, ws, 'At-Risk Families');
+    }
+
+    XLSX.writeFile(wb, `MyKolong2_Residents_${dateTag}.xlsx`);
+}
